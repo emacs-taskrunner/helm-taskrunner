@@ -69,7 +69,18 @@
 (require 'helm)
 (require 'taskrunner)
 
-;;;; Customizable
+(defgroup helm-taskrunner nil
+  "Group for helm-taskrunner frontend.")
+
+;;;; Variables
+(defcustom helm-taskrunner-project-warning
+  "The currently visited buffer must be in a project in order to select a task!
+   Please switch to a project which is recognized by projectile!"
+  "Warning used when the user tries to run helm-taskrunner while
+not in a project which is recognized by projectile."
+  :group 'helm-taskrunner
+  :type 'string)
+
 (defvaralias 'helm-taskrunner-preferred-js-package-manager 'taskrunner-preferred-js-package-manager)
 (defvaralias 'helm-taskrunner-get-all-make-targets 'taskrunner-retrieve-all-make-targets)
 (defvaralias 'helm-taskrunner-leiningen-buffer-name 'taskrunner-leiningen-buffer-name)
@@ -140,12 +151,13 @@ If it is not then prompt the user to select a project."
   (interactive)
   (helm-taskrunner--check-if-in-project)
 
-  (when (projectile-project-p)
-    (helm :sources (helm-build-sync-source "helm-taskrunner-tasks"
-                     :candidates (taskrunner-get-tasks-from-cache)
-                     :action helm-taskrunner-action-list)
-          :prompt "Task to run: "
-          :buffer "*helm taskrunner*")
+  (if (projectile-project-p)
+      (helm :sources (helm-build-sync-source "helm-taskrunner-tasks"
+                       :candidates (taskrunner-get-tasks-from-cache)
+                       :action helm-taskrunner-action-list)
+            :prompt "Task to run: "
+            :buffer "*helm taskrunner*")
+    (message helm-taskrunner-project-warning)
     )
   )
 
@@ -153,8 +165,9 @@ If it is not then prompt the user to select a project."
   "Rerun the last task ran in the currently visited project."
   (interactive)
   (helm-taskrunner--check-if-in-project)
-  (when (projectile-project-p)
-    (taskrunner-rerun-last-task (projectile-project-root))
+  (if (projectile-project-p)
+      (taskrunner-rerun-last-task (projectile-project-root))
+    (message helm-taskrunner-project-warning)
     )
   )
 
