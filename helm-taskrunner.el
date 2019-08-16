@@ -6,7 +6,7 @@
 ;; URL: https://github.com/emacs-taskrunner/helm-taskrunner
 ;; Version: 1.0
 ;; Package-Requires: ((emacs "24"))
-;; Keywords: build-system taskrunner build task-runner tasks ivy
+;; Keywords: build-system taskrunner build task-runner tasks helm
 
 ;; This file is not part of GNU Emacs.
 
