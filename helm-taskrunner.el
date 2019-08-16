@@ -34,10 +34,13 @@
 ;;;; Usage
 
 ;; When in any buffer, either call the command `helm-taskrunner' or
-;; `helm-taskrunner-update-cache' to be presented with a list of targets/tasks in
-;; your project.
-;; Additionally, if you would like to rerun the last ran command, use
-;; `helm-taskrunner-rerun-last-command'.
+;; `helm-taskrunner-update-cache' to be presented with a list of targets/tasks
+;; in your project.  ;; Additionally, if you would like to rerun the last ran
+;; command, use `helm-taskrunner-rerun-last-command'.  If you are not in a valid
+;; project(a project which is recognized by projectile) then you will be
+;; prompted to open one.
+
+
 
 ;;;; Credits
 
@@ -76,8 +79,7 @@
 (defcustom helm-taskrunner-project-warning
   "The currently visited buffer must be in a project in order to select a task!
    Please switch to a project which is recognized by projectile!"
-  "Warning used when the user tries to run helm-taskrunner while
-not in a project which is recognized by projectile."
+  "Warning used to indicate that the user is currently visiting a project."
   :group 'helm-taskrunner
   :type 'string)
 
