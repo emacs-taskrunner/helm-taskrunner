@@ -78,7 +78,50 @@
 (defvaralias 'helm-taskrunner-gradle-heading-regexps 'taskrunner-gradle-heading-regexps)
 (defvaralias 'helm-taskrunner-ant-tasks-buffer-name 'taskrunner-ant-tasks-buffer-name)
 
+(defvar helm-taskrunner-action-list
+  (helm-make-actions
+   "Run task in root without args"
+   'helm-taskrunner--root-task
+   "Run task in root and prompt for args"
+   'helm-taskrunner--root-task-prompt
+   "Run task in current directory without args"
+   'helm-taskrunner--current-dir
+   "Run task in current directory and prompt for args"
+   'helm-taskrunner--current-dir-prompt)
+  "Actions for helm-taskrunner.")
+
 ;;;; Functions
+
+(defun helm-taskrunner--root-task (TASK)
+  "Run the task TASK in the project root without asking for extra args.
+This is the default command when selecting/running a task/target."
+  (taskrunner-run-task TASK)
+  )
+
+(defun helm-taskrunner--root-task-prompt (TASK)
+  "Run the task TASK in the project root and ask the user for extra args."
+  (taskrunner-run-task TASK nil t)
+  )
+
+(defun helm-taskrunner--current-dir (TASK)
+  "Run the task TASK in the directory visited by the current buffer.
+Do not prompt the user to supply any extra arguments."
+  (let ((curr-file (buffer-file-name)))
+    (when curr-file
+      ;; (message "FILENAME: %s Task: %s" (file-name-directory curr-file) TASK)
+      (taskrunner-run-task TASK (file-name-directory curr-file) nil))
+    )
+  )
+
+(defun helm-taskrunner--current-dir-prompt (TASK)
+  "Run the task TASK in the directory visited by the current buffer.
+Prompt the user to supply extra arguments."
+  (let ((curr-file (buffer-file-name)))
+    (when curr-file
+      ;; (message "FILENAME: %s Task: %s" (file-name-directory curr-file) TASK)
+      (taskrunner-run-task TASK (file-name-directory curr-file) t))
+    )
+  )
 
 (defun helm-taskrunner--check-if-in-project ()
   "Check if the currently visited buffer is in a project.
@@ -99,7 +142,8 @@ If it is not then prompt the user to select a project."
 
   (when (projectile-project-p)
     (helm :sources (helm-build-sync-source "helm-taskrunner-tasks"
-                     :candidates (taskrunner-get-tasks-from-cache))
+                     :candidates (taskrunner-get-tasks-from-cache)
+                     :action helm-taskrunner-action-list)
           :prompt "Task to run: "
           :buffer "*helm taskrunner*")
     )
