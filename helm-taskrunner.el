@@ -108,33 +108,25 @@
 (defun helm-taskrunner--root-task (TASK)
   "Run the task TASK in the project root without asking for extra args.
 This is the default command when selecting/running a task/target."
-  (taskrunner-run-task TASK)
-  )
+  (taskrunner-run-task TASK))
 
 (defun helm-taskrunner--root-task-prompt (TASK)
   "Run the task TASK in the project root and ask the user for extra args."
-  (taskrunner-run-task TASK nil t)
-  )
+  (taskrunner-run-task TASK nil t))
 
 (defun helm-taskrunner--current-dir (TASK)
   "Run the task TASK in the directory visited by the current buffer.
 Do not prompt the user to supply any extra arguments."
   (let ((curr-file (buffer-file-name)))
     (when curr-file
-      ;; (message "FILENAME: %s Task: %s" (file-name-directory curr-file) TASK)
-      (taskrunner-run-task TASK (file-name-directory curr-file) nil))
-    )
-  )
+      (taskrunner-run-task TASK (file-name-directory curr-file) nil))))
 
 (defun helm-taskrunner--current-dir-prompt (TASK)
   "Run the task TASK in the directory visited by the current buffer.
 Prompt the user to supply extra arguments."
   (let ((curr-file (buffer-file-name)))
     (when curr-file
-      ;; (message "FILENAME: %s Task: %s" (file-name-directory curr-file) TASK)
-      (taskrunner-run-task TASK (file-name-directory curr-file) t))
-    )
-  )
+      (taskrunner-run-task TASK (file-name-directory curr-file) t))))
 
 (defun helm-taskrunner--check-if-in-project ()
   "Check if the currently visited buffer is in a project.
@@ -143,10 +135,7 @@ If it is not then prompt the user to select a project."
     (when (not in-project-p)
       (if (package-installed-p 'helm-projectile)
           (helm-projectile-switch-project)
-        (projectile-switch-project))
-      )
-    )
-  )
+        (projectile-switch-project)))))
 
 (defun helm-taskrunner ()
   "Launch helm to select a task which is ran in the currently visited project."
@@ -159,9 +148,13 @@ If it is not then prompt the user to select a project."
                        :action helm-taskrunner-action-list)
             :prompt "Task to run: "
             :buffer "*helm taskrunner*")
-    (message helm-taskrunner-project-warning)
-    )
-  )
+    (message helm-taskrunner-project-warning)))
+
+(defun helm-taskrunner-update-cache ()
+  "Refresh the task cache for the current project and show all tasks."
+  (interactive)
+  (taskrunner-refresh-cache)
+  (helm-taskrunner))
 
 (defun helm-taskrunner-rerun-last-command ()
   "Rerun the last task ran in the currently visited project."
@@ -169,9 +162,7 @@ If it is not then prompt the user to select a project."
   (helm-taskrunner--check-if-in-project)
   (if (projectile-project-p)
       (taskrunner-rerun-last-task (projectile-project-root))
-    (message helm-taskrunner-project-warning)
-    )
-  )
+    (message helm-taskrunner-project-warning)))
 
 (provide 'helm-taskrunner)
 ;;; helm-taskrunner.el ends here
