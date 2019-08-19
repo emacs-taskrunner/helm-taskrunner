@@ -107,6 +107,16 @@
    'helm-taskrunner--current-dir-prompt)
   "Actions for helm-taskrunner.")
 
+(defvar helm-taskrunner-buffer-action-list
+  (helm-make-actions
+   "Switch to buffer"
+   'switch-to-buffer
+   "Kill buffer"
+   'helm-taskrunner--kill-buffer
+   "Kill all buffers"
+   'helm-taskrunner--kill-all-buffers)
+  "Actions for helm-taskrunner buffer list.")
+
 ;;;; Functions
 
 (defun helm-taskrunner--root-task (TASK)
@@ -131,6 +141,17 @@ Prompt the user to supply extra arguments."
   (let ((curr-file (buffer-file-name)))
     (when curr-file
       (taskrunner-run-task TASK (file-name-directory curr-file) t))))
+
+(defun helm-taskrunner--kill-buffer (BUFFER-NAME)
+  "Kill the buffer name BUFFER-NAME."
+  (kill-buffer BUFFER-NAME))
+
+(defun helm-taskrunner--kill-all-buffers (TEMP)
+  "Kill all helm-taskrunner task buffers.
+The argument TEMP is simply there since a Helm action requires a function with
+one input."
+  (taskrunner-kill-compilation-buffers))
+
 
 (defun helm-taskrunner--check-if-in-project ()
   "Check if the currently visited buffer is in a project.
@@ -175,9 +196,10 @@ If it is not then prompt the user to select a project."
     (if taskrunner-buffers
         (helm :sources (helm-build-sync-source "helm-taskrunner-buffer-source"
                          :candidates taskrunner-buffers
-                         :action nil)
+                         :action helm-taskrunner-buffer-action-list)
               :prompt "Buffer to open: "
-              :buffer "*helm-taskrunner-buffers*")
+              :buffer "*helm-taskrunner-buffers*"
+              :default 'switch-to-buffer)
       (message helm-taskrunner-no-buffers-warning))))
 
 (provide 'helm-taskrunner)
