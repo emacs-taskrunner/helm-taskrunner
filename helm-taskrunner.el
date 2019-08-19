@@ -73,7 +73,8 @@
 (require 'taskrunner)
 
 (defgroup helm-taskrunner nil
-  "Group for helm-taskrunner frontend.")
+  "Group for helm-taskrunner frontend."
+  :group 'convenience)
 
 ;;;; Variables
 (defcustom helm-taskrunner-project-warning
@@ -146,7 +147,7 @@ Prompt the user to supply extra arguments."
   "Kill the buffer name BUFFER-NAME."
   (kill-buffer BUFFER-NAME))
 
-(defun helm-taskrunner--kill-all-buffers (TEMP)
+(defun helm-taskrunner--kill-all-buffers ()
   "Kill all helm-taskrunner task buffers.
 The argument TEMP is simply there since a Helm action requires a function with
 one input."
@@ -159,7 +160,9 @@ If it is not then prompt the user to select a project."
   (let ((in-project-p (projectile-project-p)))
     (when (not in-project-p)
       (if (package-installed-p 'helm-projectile)
-          (helm-projectile-switch-project)
+          (progn
+            (require 'helm-projectile)
+            (helm-projectile-switch-project))
         (projectile-switch-project)))))
 
 (defun helm-taskrunner ()
