@@ -32,15 +32,13 @@
 ;; (require 'helm-taskrunner)
 
 ;;;; Usage
-
-;; When in any buffer, either call the command `helm-taskrunner' or
-;; `helm-taskrunner-update-cache' to be presented with a list of targets/tasks
-;; in your project.  ;; Additionally, if you would like to rerun the last ran
-;; command, use `helm-taskrunner-rerun-last-command'.  If you are not in a valid
-;; project(a project which is recognized by projectile) then you will be
-;; prompted to open one.
-
-
+;; When in any buffer recognized by projectile, call the command
+;; `helm-taskrunner' to launch an helm menu which shows all possible tasks/targets
+;; in the project.  If you add new tasks then call `helm-taskrunner-update-cache'
+;; to make sure that the newly added commands will be shown.  You can use the
+;; command `helm-taskrunner-task-buffers' to show all buffers which were used to
+;; run a task Additionally, if you would like to rerun the last ran command, use
+;; `helm-taskrunner-rerun-last-command'.
 
 ;;;; Credits
 
