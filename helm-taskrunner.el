@@ -166,6 +166,7 @@ If it is not then prompt the user to select a project."
             (helm-projectile-switch-project))
         (projectile-switch-project)))))
 
+;;;###autoload
 (defun helm-taskrunner ()
   "Launch helm to select a task which is ran in the currently visited project."
   (interactive)
@@ -179,12 +180,14 @@ If it is not then prompt the user to select a project."
             :buffer "*helm-taskrunner*")
     (message helm-taskrunner-project-warning)))
 
+;;;###autoload
 (defun helm-taskrunner-update-cache ()
   "Refresh the task cache for the current project and show all tasks."
   (interactive)
   (taskrunner-refresh-cache)
   (helm-taskrunner))
 
+;;;###autoload
 (defun helm-taskrunner-rerun-last-command ()
   "Rerun the last task ran in the currently visited project."
   (interactive)
@@ -193,6 +196,7 @@ If it is not then prompt the user to select a project."
       (taskrunner-rerun-last-task (projectile-project-root))
     (message helm-taskrunner-project-warning)))
 
+;;;###autoload
 (defun helm-taskrunner-task-buffers ()
   "Show all helm-taskrunner task buffers."
   (interactive)
