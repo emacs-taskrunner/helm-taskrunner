@@ -145,10 +145,13 @@ Prompt the user to supply extra arguments."
   "Kill the buffer name BUFFER-NAME."
   (kill-buffer BUFFER-NAME))
 
-(defun helm-taskrunner--kill-all-buffers ()
+(defun helm-taskrunner--kill-all-buffers (TEMP)
   "Kill all helm-taskrunner task buffers.
 The argument TEMP is simply there since a Helm action requires a function with
 one input."
+  ;; Silence bytecompile warning. TEMP will be a string passed by helm but it is
+  ;; useless since this function kills all buffers.
+  TEMP
   (taskrunner-kill-compilation-buffers))
 
 
