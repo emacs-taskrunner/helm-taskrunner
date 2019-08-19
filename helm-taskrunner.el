@@ -91,6 +91,10 @@
 (defvaralias 'helm-taskrunner-gradle-heading-regexps 'taskrunner-gradle-heading-regexps)
 (defvaralias 'helm-taskrunner-ant-tasks-buffer-name 'taskrunner-ant-tasks-buffer-name)
 
+(defconst helm-taskrunner-no-buffers-warning
+  "helm-taskrunner: No taskrunner buffers are currently opened!"
+  "Warning used to indicate that there are not task buffers opened.")
+
 (defvar helm-taskrunner-action-list
   (helm-make-actions
    "Run task in root without args"
@@ -147,7 +151,7 @@ If it is not then prompt the user to select a project."
                        :candidates (taskrunner-get-tasks-from-cache)
                        :action helm-taskrunner-action-list)
             :prompt "Task to run: "
-            :buffer "*helm taskrunner*")
+            :buffer "*helm-taskrunner*")
     (message helm-taskrunner-project-warning)))
 
 (defun helm-taskrunner-update-cache ()
@@ -163,6 +167,18 @@ If it is not then prompt the user to select a project."
   (if (projectile-project-p)
       (taskrunner-rerun-last-task (projectile-project-root))
     (message helm-taskrunner-project-warning)))
+
+(defun helm-taskrunner-task-buffers ()
+  "Show all helm-taskrunner task buffers."
+  (interactive)
+  (let ((taskrunner-buffers (taskrunner-get-compilation-buffers)))
+    (if taskrunner-buffers
+        (helm :sources (helm-build-sync-source "helm-taskrunner-buffer-source"
+                         :candidates taskrunner-buffers
+                         :action nil)
+              :prompt "Buffer to open: "
+              :buffer "*helm-taskrunner-buffers*")
+      (message helm-taskrunner-no-buffers-warning))))
 
 (provide 'helm-taskrunner)
 ;;; helm-taskrunner.el ends here
