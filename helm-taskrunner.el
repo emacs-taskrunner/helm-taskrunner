@@ -76,11 +76,21 @@
 
 ;;;; Variables
 (defcustom helm-taskrunner-project-warning
-  "The currently visited buffer must be in a project in order to select a task!
+  "helm-taskrunner: The currently visited buffer must be in a project in order to select a task!
    Please switch to a project which is recognized by projectile!"
   "Warning used to indicate that the user is currently visiting a project."
   :group 'helm-taskrunner
   :type 'string)
+
+(defcustom helm-taskrunner-no-files-found-warning
+  "helm-taskrunner: There are no configuration files for any taskrunner/build system in the current project."
+  "Warning used to indicate that no configuration files were found in the current project."
+  :group 'helm-taskrunner
+  :type 'string)
+
+(defconst helm-taskrunner-no-buffers-warning
+  "helm-taskrunner: No taskrunner buffers are currently opened!"
+  "Warning used to indicate that there are not task buffers opened.")
 
 (defvaralias 'helm-taskrunner-preferred-js-package-manager 'taskrunner-preferred-js-package-manager)
 (defvaralias 'helm-taskrunner-get-all-make-targets 'taskrunner-retrieve-all-make-targets)
@@ -89,10 +99,6 @@
 (defvaralias 'helm-taskrunner-gradle-taskbuffer-name 'taskrunner-gradle-tasks-buffer-name)
 (defvaralias 'helm-taskrunner-gradle-heading-regexps 'taskrunner-gradle-heading-regexps)
 (defvaralias 'helm-taskrunner-ant-tasks-buffer-name 'taskrunner-ant-tasks-buffer-name)
-
-(defconst helm-taskrunner-no-buffers-warning
-  "helm-taskrunner: No taskrunner buffers are currently opened!"
-  "Warning used to indicate that there are not task buffers opened.")
 
 (defvar helm-taskrunner-action-list
   (helm-make-actions
@@ -115,6 +121,9 @@
    "Kill all buffers"
    'helm-taskrunner--kill-all-buffers)
   "Actions for helm-taskrunner buffer list.")
+
+(defvar helm-taskrunner--project-files '()
+  "Used to store the project files and their paths.")
 
 ;;;; Functions
 
@@ -209,6 +218,46 @@ If it is not then prompt the user to select a project."
               :buffer "*helm-taskrunner-buffers*"
               :default 'switch-to-buffer)
       (message helm-taskrunner-no-buffers-warning))))
+
+
+(defun helm-taskrunner--open-file (FILENAME)
+  "Open the file FILENAME.
+This function is meant to be used with helm only."
+  (setq helm-taskrunner--project-files  (car (alist-get (intern FILENAME) helm-taskrunner--project-files)))
+  (find-file helm-taskrunner--project-files))
+
+(defun helm-taskrunner--select-system (SYS)
+  "Retrive the files for the taskrunner/build system SYS."
+  (setq helm-taskrunner--project-files   (car (alist-get (intern SYS) helm-taskrunner--project-files)))
+  (if (stringp helm-taskrunner--project-files)
+      (find-file helm-taskrunner--project-files)
+    (helm
+     :sources (helm-build-sync-source "helm-taskrunner-files-source"
+                :candidates (map 'list (lambda (elem)
+                                         (car elem))
+                                 helm-taskrunner--project-files)
+                :action '(("Select file: " . helm-taskrunner--open-file)))
+     :prompt "Select a file: "
+     :buffer "*helm-taskrunner-files*"
+     :default 'helm-taskrunner--open-file)))
+
+(defun helm-taskrunner-config-files ()
+  "Open the configuration files(if any are present) at project root."
+  (interactive)
+  (helm-taskrunner--check-if-in-project)
+  (setq helm-taskrunner--project-files (taskrunner-collect-taskrunner-files (projectile-project-root)))
+  (if helm-taskrunner--project-files
+      (helm
+       :sources (helm-build-sync-source "helm-taskrunner-files-source"
+                  :candidates (map 'list (lambda (elem)
+                                           (car elem))
+                                   helm-taskrunner--project-files)
+                  :action '(("Select build system" . helm-taskrunner--select-system)))
+       :prompt "Select a taskrunner: "
+       :buffer "*helm-taskrunner-files*"
+       :default 'helm-taskrunner--get-config-file-paths)
+    (message helm-taskrunner-no-files-found-warning))
+  )
 
 (provide 'helm-taskrunner)
 ;;; helm-taskrunner.el ends here
