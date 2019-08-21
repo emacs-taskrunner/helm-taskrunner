@@ -167,13 +167,13 @@ one input."
 (defun helm-taskrunner--check-if-in-project ()
   "Check if the currently visited buffer is in a project.
 If it is not then prompt the user to select a project."
-  (let ((in-project-p (projectile-project-p)))
-    (when (not in-project-p)
+  (if (not (projectile-project-p))
       (if (package-installed-p 'helm-projectile)
           (progn
             (require 'helm-projectile)
             (helm-projectile-switch-project))
-        (projectile-switch-project)))))
+        (projectile-switch-project))
+    t))
 
 ;;;###autoload
 (defun helm-taskrunner ()
@@ -219,6 +219,7 @@ If it is not then prompt the user to select a project."
               :default 'switch-to-buffer)
       (message helm-taskrunner-no-buffers-warning))))
 
+;;;###autoload
 (defun helm-taskrunner-kill-all-buffers ()
   "Kill all helm-taskrunner compilation buffers."
   (interactive)
@@ -245,6 +246,7 @@ This function is meant to be used with helm only."
      :buffer "*helm-taskrunner-files*"
      :default 'helm-taskrunner--open-file)))
 
+;;;###autoload
 (defun helm-taskrunner-config-files ()
   "Open the configuration files(if any are present) at project root."
   (interactive)
@@ -260,8 +262,7 @@ This function is meant to be used with helm only."
        :prompt "Select a taskrunner: "
        :buffer "*helm-taskrunner-files*"
        :default 'helm-taskrunner--get-config-file-paths)
-    (message helm-taskrunner-no-files-found-warning))
-  )
+    (message helm-taskrunner-no-files-found-warning)))
 
 (provide 'helm-taskrunner)
 ;;; helm-taskrunner.el ends here
