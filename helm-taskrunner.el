@@ -219,6 +219,10 @@ If it is not then prompt the user to select a project."
               :default 'switch-to-buffer)
       (message helm-taskrunner-no-buffers-warning))))
 
+(defun helm-taskrunner-kill-all-buffers ()
+  "Kill all helm-taskrunner compilation buffers."
+  (interactive)
+  (taskrunner-kill-compilation-buffers))
 
 (defun helm-taskrunner--open-file (FILENAME)
   "Open the file FILENAME.
