@@ -218,7 +218,9 @@ are the tasks for that project."
 
 ;;;###autoload
 (defun helm-taskrunner ()
-  "Launch helm to select a task which is ran in the currently visited project."
+  "Launch helm to select a task which is ran in the currently visited project.
+This command runs asynchronously and depending on the number of
+tasks which have to be retrieved, it might take several seconds."
   (interactive)
   (helm-taskrunner--check-if-in-project)
   (if (projectile-project-p)
@@ -226,7 +228,7 @@ are the tasks for that project."
        `(lambda ()
           ;; inject the load path so we can find taskrunner
           ,(async-inject-variables "\\`load-path\\'")
-          ,(async-inject-variables "taskrunner-tasks-cache")
+          ,(async-inject-variables "taskrunner-.*")
           (require 'cl)
           (require 'taskrunner)
           (taskrunner-get-tasks-from-cache-async)
