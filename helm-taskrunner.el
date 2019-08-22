@@ -75,10 +75,17 @@
   :group 'convenience)
 
 ;;;; Variables
+
 (defcustom helm-taskrunner-project-warning
   "helm-taskrunner: The currently visited buffer must be in a project in order to select a task!
    Please switch to a project which is recognized by projectile!"
   "Warning used to indicate that the user is currently visiting a project."
+  :group 'helm-taskrunner
+  :type 'string)
+
+(defcustom helm-taskrunner-no-targets-found-warning
+  "helm-taskrunner: No targets found in the current project!"
+  "Warning used to indicate that no targets were found."
   :group 'helm-taskrunner
   :type 'string)
 
@@ -87,6 +94,12 @@
   "Warning used to indicate that no configuration files were found in the current project."
   :group 'helm-taskrunner
   :type 'string)
+
+(defcustom helm-taskrunner-use-fuzzy-match t
+  "Variable used to enable/disable fuzzy matching for helm-taskrunner instances."
+  :group 'helm-taskrunner
+  :type 'boolean
+  :options '(nil t))
 
 (defconst helm-taskrunner-no-buffers-warning
   "helm-taskrunner: No taskrunner buffers are currently opened!"
@@ -154,13 +167,14 @@ Prompt the user to supply extra arguments."
   "Kill the buffer name BUFFER-NAME."
   (kill-buffer BUFFER-NAME))
 
-(defun helm-taskrunner--kill-all-buffers (TEMP)
+(defun helm-taskrunner--kill-all-buffers (UNUSED)
   "Kill all helm-taskrunner task buffers.
-The argument TEMP is simply there since a Helm action requires a function with
+The argument UNUSED is simply there since a Helm action requires a function with
 one input."
   ;; Silence bytecompile warning. TEMP will be a string passed by helm but it is
-  ;; useless since this function kills all buffers.
-  TEMP
+  ;; useless since this function kills all buffers. If there this function
+  ;; accepts no arguments then helm throws an error.
+  UNUSED
   (taskrunner-kill-compilation-buffers))
 
 
@@ -175,18 +189,33 @@ If it is not then prompt the user to select a project."
         (projectile-switch-project))
     t))
 
+(defun helm-taskrunner--run-helm (TARGETS)
+  "Run an instance of Helm with TARGETS as choices.
+If targets is nil then display an error message without running Helm."
+  (if (null TARGETS)
+      (message helm-taskrunner-no-targets-found-warning)
+    (helm :sources (helm-build-sync-source "helm-taskrunner-tasks"
+                     :candidates TARGETS
+                     :action helm-taskrunner-action-list)
+          :prompt "Task to run: "
+          :buffer "*helm-taskrunner*"
+          :fuzzy helm-taskrunner-use-fuzzy-match)))
+
 ;;;###autoload
 (defun helm-taskrunner ()
   "Launch helm to select a task which is ran in the currently visited project."
   (interactive)
   (helm-taskrunner--check-if-in-project)
-
   (if (projectile-project-p)
-      (helm :sources (helm-build-sync-source "helm-taskrunner-tasks"
-                       :candidates (taskrunner-get-tasks-from-cache)
-                       :action helm-taskrunner-action-list)
-            :prompt "Task to run: "
-            :buffer "*helm-taskrunner*")
+      (async-start
+       `(lambda ()
+          ;; inject the load path so we can find taskrunner
+          ,(async-inject-variables "\\`load-path\\'")
+          (require 'cl)
+          (require 'taskrunner)
+          (taskrunner-get-tasks-from-cache)
+          )
+       'helm-taskrunner--run-helm)
     (message helm-taskrunner-project-warning)))
 
 ;;;###autoload
