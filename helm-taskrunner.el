@@ -25,6 +25,7 @@
 
 ;; projectile
 ;; taskrunner
+;; async
 ;; helm
 
 ;; Then put this folder in your load-path, and put this in your init:
@@ -68,6 +69,7 @@
 ;;;; Requirements
 
 (require 'helm)
+(require 'async)
 (require 'taskrunner)
 
 (defgroup helm-taskrunner nil
@@ -191,15 +193,28 @@ If it is not then prompt the user to select a project."
 
 (defun helm-taskrunner--run-helm (TARGETS)
   "Run an instance of Helm with TARGETS as choices.
-If targets is nil then display an error message without running Helm."
-  (if (null TARGETS)
-      (message helm-taskrunner-no-targets-found-warning)
-    (helm :sources (helm-build-sync-source "helm-taskrunner-tasks"
-                     :candidates TARGETS
-                     :action helm-taskrunner-action-list)
-          :prompt "Task to run: "
-          :buffer "*helm-taskrunner*"
-          :fuzzy helm-taskrunner-use-fuzzy-match)))
+If targets is nil then display an error message without running Helm.
+TARGETS should be a list of the form:
+\(cache-status project-directory project-tasks)
+where cache-status indicates if the project tasks are in the cache,
+project-directory is the directory of the project and project-tasks
+are the tasks for that project."
+  (let ((cache-status (car TARGETS))
+        (proj-dir (cadr TARGETS))
+        (proj-tasks (caddr TARGETS))
+        )
+    (if (null proj-tasks)
+        (message helm-taskrunner-no-targets-found-warning)
+      (progn
+        ;; If the tasks are not in the cache then add them
+        (when (null cache-status)
+          (taskrunner-add-to-tasks-cache proj-dir proj-tasks))
+        (helm :sources (helm-build-sync-source "helm-taskrunner-tasks"
+                         :candidates proj-tasks
+                         :action helm-taskrunner-action-list)
+              :prompt "Task to run: "
+              :buffer "*helm-taskrunner*"
+              :fuzzy helm-taskrunner-use-fuzzy-match)))))
 
 ;;;###autoload
 (defun helm-taskrunner ()
@@ -211,9 +226,10 @@ If targets is nil then display an error message without running Helm."
        `(lambda ()
           ;; inject the load path so we can find taskrunner
           ,(async-inject-variables "\\`load-path\\'")
+          ,(async-inject-variables "taskrunner-tasks-cache")
           (require 'cl)
           (require 'taskrunner)
-          (taskrunner-get-tasks-from-cache)
+          (taskrunner-get-tasks-from-cache-async)
           )
        'helm-taskrunner--run-helm)
     (message helm-taskrunner-project-warning)))
