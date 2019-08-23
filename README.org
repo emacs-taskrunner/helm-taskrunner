@@ -31,6 +31,11 @@ There are several entry points for this package:
   - at a custom directory selected by the user
   - at a custom directory selected by the user with extra arguments supplied by
     the user
+    
+    *Warning*: This function is asynchronous so the tasks might now appear for a
+    few seconds. You are free to continue working until they do. If for some
+    reason no tasks can be located, an error message will be displayed in the
+    echo buffer.
 - ~helm-taskrunner-buffers~: Every time a command is ran, a new buffer is spawned
   containing that commands output. This command displays a helm buffer letting
   the user select one of these command buffers and use an action on it. There
@@ -86,3 +91,7 @@ The following systems are currently supported:
 - [X] Cask(Limited Support)
 - [X] stack(Limited Support)
 - [X] cabal(Limited Support)
+* Bug Reports and Echancement Requests
+If you have a bug report related to the user interface then please submit it
+here. Otherwise, all other bug reports and echancement requests should go to the
+[[https://github.com/emacs-taskrunner/emacs-taskrunner][emacs-taskrunner repository]].
