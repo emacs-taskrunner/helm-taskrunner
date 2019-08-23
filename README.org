@@ -14,9 +14,9 @@ This package will be submitted to melpa shortly.
 ** Manually
 To install this package, you will need the following:
 
--[[https://github.com/bbatsov/projectile][ projectile]] 
+- [[https://github.com/bbatsov/projectile][projectile]] 
 - [[https://github.com/bbatsov/helm-projectile][(OPTIONAL) helm-projectile]] 
--[[https://github.com/emacs-helm/helm][  Helm]] 
+- [[https://github.com/emacs-helm/helm][Helm]] 
 - [[https://github.com/emacs-taskrunner/emacs-taskrunner][emacs-taskrunner]]
 - [[https://github.com/jwiegley/emacs-async][emacs-async]] 
 * Usage
