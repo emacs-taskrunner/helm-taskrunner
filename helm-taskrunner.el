@@ -80,7 +80,7 @@
 
 (defcustom helm-taskrunner-project-warning
   "helm-taskrunner: The currently visited buffer must be in a project in order to select a task!
-   Please switch to a project which is recognized by projectile!"
+Please switch to a project which is recognized by projectile!"
   "Warning used to indicate that the user is currently visiting a project."
   :group 'helm-taskrunner
   :type 'string)
@@ -211,7 +211,8 @@ have to be retrieved, it might take several seconds."
   (interactive)
   (helm-taskrunner--check-if-in-project)
   (if (projectile-project-p)
-      (taskrunner-get-tasks-async 'helm-taskrunner--run-helm-for-targets)))
+      (taskrunner-get-tasks-async 'helm-taskrunner--run-helm-for-targets)
+    (message helm-taskrunner-project-warning)))
 
 ;;;###autoload
 (defun helm-taskrunner-update-cache ()
@@ -219,7 +220,8 @@ have to be retrieved, it might take several seconds."
   (interactive)
   (helm-taskrunner--check-if-in-project)
   (if (projectile-project-p)
-      (taskrunner-refresh-cache-async 'helm-taskrunner--run-helm-for-targets)))
+      (taskrunner-refresh-cache-async 'helm-taskrunner--run-helm-for-targets)
+    (message helm-taskrunner-project-warning)))
 
 ;;;###autoload
 (defun helm-taskrunner-rerun-last-command ()
