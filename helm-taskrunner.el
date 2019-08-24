@@ -191,6 +191,18 @@ If it is not then prompt the user to select a project."
         (projectile-switch-project))
     t))
 
+(defun helm-taskrunner--run-helm-for-targets (TARGETS)
+  "Launch a Helm instance with candidates TARGETS.
+If TARGETS is nil then a warning is shown which mentions that no targets were found."
+  (if (null TARGETS)
+      (message helm-taskrunner-no-targets-found-warning)
+    (helm :sources (helm-build-sync-source "helm-taskrunner-tasks"
+                     :candidates TARGETS
+                     :action helm-taskrunner-action-list)
+          :prompt "Task to run: "
+          :buffer "*helm-taskrunner*"
+          :fuzzy helm-taskrunner-use-fuzzy-match)))
+
 ;;;###autoload
 (defun helm-taskrunner ()
   "Launch helm to select a task which is ran in the currently visited project.
@@ -199,22 +211,15 @@ have to be retrieved, it might take several seconds."
   (interactive)
   (helm-taskrunner--check-if-in-project)
   (if (projectile-project-p)
-      (taskrunner-get-tasks-async (lambda (TARGETS)
-                                    (if (null TARGETS)
-                                        (message helm-taskrunner-no-targets-found-warning)
-                                      (helm :sources (helm-build-sync-source "helm-taskrunner-tasks"
-                                                       :candidates TARGETS
-                                                       :action helm-taskrunner-action-list)
-                                            :prompt "Task to run: "
-                                            :buffer "*helm-taskrunner*"
-                                            :fuzzy helm-taskrunner-use-fuzzy-match))))))
+      (taskrunner-get-tasks-async 'helm-taskrunner--run-helm-for-targets)))
 
 ;;;###autoload
 (defun helm-taskrunner-update-cache ()
   "Refresh the task cache for the current project and show all tasks."
   (interactive)
-  (taskrunner-refresh-cache)
-  (helm-taskrunner))
+  (helm-taskrunner--check-if-in-project)
+  (if (projectile-project-p)
+      (taskrunner-refresh-cache-async 'helm-taskrunner--run-helm-for-targets)))
 
 ;;;###autoload
 (defun helm-taskrunner-rerun-last-command ()
