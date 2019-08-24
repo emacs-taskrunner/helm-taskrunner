@@ -115,7 +115,7 @@ Please switch to a project which is recognized by projectile!"
 (defvaralias 'helm-taskrunner-gradle-heading-regexps 'taskrunner-gradle-heading-regexps)
 (defvaralias 'helm-taskrunner-ant-tasks-buffer-name 'taskrunner-ant-tasks-buffer-name)
 
-(defvar helm-taskrunner-action-list
+(defconst helm-taskrunner-action-list
   (helm-make-actions
    "Run task in root without args"
    'helm-taskrunner--root-task
@@ -124,10 +124,14 @@ Please switch to a project which is recognized by projectile!"
    "Run task in current directory without args"
    'helm-taskrunner--current-dir
    "Run task in current directory and prompt for args"
-   'helm-taskrunner--current-dir-prompt)
+   'helm-taskrunner--current-dir-prompt
+   "Run task in another directory"
+   'helm-taskrunner--select-dir
+   "Run task in another directory and prompt for args"
+   'helm-taskrunner--select-dir-prompt)
   "Actions for helm-taskrunner.")
 
-(defvar helm-taskrunner-buffer-action-list
+(defconst helm-taskrunner-buffer-action-list
   (helm-make-actions
    "Switch to buffer"
    'switch-to-buffer
@@ -164,6 +168,20 @@ Prompt the user to supply extra arguments."
   (let ((curr-file (buffer-file-name)))
     (when curr-file
       (taskrunner-run-task TASK (file-name-directory curr-file) t))))
+
+(defun helm-taskrunner--select-dir (TASK)
+  "Run the task TASK in a directory chosen by the user."
+  (let ((command-directory (read-directory-name "Directory: " (projectile-project-root))))
+    (message command-directory)
+    (when command-directory
+      (taskrunner-run-task TASK command-directory))))
+
+(defun helm-taskrunner--select-dir-prompt (TASK)
+  "Run the task TASK in a directory chosen by the user.
+Prompt the user to supply extra arguments."
+  (let ((command-directory (read-directory-name "Directory: " (projectile-project-root))))
+    (when command-directory
+      (taskrunner-run-task TASK command-directory t))))
 
 (defun helm-taskrunner--kill-buffer (BUFFER-NAME)
   "Kill the buffer name BUFFER-NAME."
