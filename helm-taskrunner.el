@@ -218,7 +218,7 @@ If it is not then prompt the user to select a project."
         (projectile-switch-project))
     t))
 
-;; TODO: Find a way not to replicate this code so much
+;; TODO: Find a way not to replicate the helm code code so much
 (defun helm-taskrunner--run-helm-for-targets (TARGETS)
   "Launch a Helm instance with candidates TARGETS.
 If TARGETS is nil then a warning is shown which mentions that no targets were found."
@@ -247,7 +247,20 @@ have to be retrieved, it might take several seconds."
   (interactive)
   (helm-taskrunner--check-if-in-project)
   (if (projectile-project-p)
-      (taskrunner-get-tasks-async 'helm-taskrunner--run-helm-for-targets)
+      ;; Check for the thread function explicitly instead of simply emacs-26
+      ;; since it might be compiled without threads(I think this is possible) If
+      ;; the thread functions are not available then use the `emacs-async'
+      ;; approach which spawns a separate process. Either way, the behaviour and
+      ;; output is consistent accross emacs versions
+      (if (and (fboundp 'make-thread)
+               (fboundp 'run-at-time))
+          (progn 
+            (message "taskrunner: Using threads!")
+            (taskrunner-run-thread-function 'taskrunner-get-tasks-sync 'helm-taskrunner--run-helm-for-targets))
+        (progn
+          (message "taskrunner: Using async!")
+          (taskrunner-get-tasks-async 'helm-taskrunner--run-helm-for-targets))
+        )
     (message helm-taskrunner-project-warning)))
 
 ;;;###autoload
