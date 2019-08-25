@@ -26,18 +26,20 @@
 ;; projectile
 ;; taskrunner
 ;; helm
-
+;; (OPTIONAL) helm-projectile
 ;; Then put this folder in your load-path, and put this in your init:
 
 ;; (require 'helm-taskrunner)
 
 ;;;; Usage
 ;; When in any buffer recognized by projectile, call the command
-;; `helm-taskrunner' to launch an helm menu which shows all possible tasks/targets
-;; in the project.  If you add new tasks then call `helm-taskrunner-update-cache'
-;; to make sure that the newly added commands will be shown.  You can use the
-;; command `helm-taskrunner-task-buffers' to show all buffers which were used to
-;; run a task Additionally, if you would like to rerun the last ran command, use
+;; `helm-taskrunner' to launch an helm menu which shows all possible
+;; tasks/targets in the project.  If you add new tasks then call
+;; `helm-taskrunner-update-cache' to make sure that the newly added commands
+;; will be shown.  You can use the command `helm-taskrunner-task-buffers' to
+;; show all buffers which were used to run a task.  If you would like to kill all
+;; buffers then you can use the command `helm-taskrunner-kill-all-buffers'
+;; Additionally, if you would like to rerun the last ran command, use
 ;; `helm-taskrunner-rerun-last-command'.
 
 ;;;; Credits
@@ -97,7 +99,7 @@ Please switch to a project which is recognized by projectile!"
   :type 'string)
 
 (defcustom helm-taskrunner-use-fuzzy-match t
-  "Variable used to enable/disable fuzzy matching for helm-taskrunner instances."
+  "Variable used to enable/disable fuzzy matching for `helm-taskrunner' instances."
   :group 'helm-taskrunner
   :type 'boolean
   :options '(nil t))
@@ -131,7 +133,7 @@ Please switch to a project which is recognized by projectile!"
    'helm-taskrunner--select-dir
    "Run task in another directory and prompt for args"
    'helm-taskrunner--select-dir-prompt)
-  "Actions for helm-taskrunner.")
+  "Actions for `helm-taskrunner'.")
 
 (defconst helm-taskrunner-buffer-action-list
   (helm-make-actions
@@ -141,7 +143,7 @@ Please switch to a project which is recognized by projectile!"
    'helm-taskrunner--kill-buffer
    "Kill all buffers"
    'helm-taskrunner--kill-all-buffers)
-  "Actions for helm-taskrunner buffer list.")
+  "Actions for `helm-taskrunner' buffer list.")
 
 (defvar helm-taskrunner--project-files '()
   "Used to store the project files and their paths.")
@@ -189,7 +191,7 @@ Prompt the user to supply extra arguments."
   (kill-buffer BUFFER-NAME))
 
 (defun helm-taskrunner--kill-all-buffers (UNUSED)
-  "Kill all helm-taskrunner task buffers.
+  "Kill all `helm-taskrunner' task buffers.
 The argument UNUSED is simply there since a Helm action requires a function with
 one input."
   ;; Silence bytecompile warning. TEMP will be a string passed by helm but it is
@@ -220,8 +222,7 @@ If TARGETS is nil then a warning is shown which mentions that no targets were fo
                      :action helm-taskrunner-action-list)
           :prompt "Task to run: "
           :buffer "*helm-taskrunner*"
-          :fuzzy helm-taskrunner-use-fuzzy-match))
-  )
+          :fuzzy helm-taskrunner-use-fuzzy-match)))
 
 ;;;###autoload
 (defun helm-taskrunner ()
@@ -254,7 +255,7 @@ have to be retrieved, it might take several seconds."
 
 ;;;###autoload
 (defun helm-taskrunner-task-buffers ()
-  "Show all helm-taskrunner task buffers."
+  "Show all `helm-taskrunner' task buffers."
   (interactive)
   (let ((taskrunner-buffers (taskrunner-get-compilation-buffers)))
     (if taskrunner-buffers
@@ -268,7 +269,7 @@ have to be retrieved, it might take several seconds."
 
 ;;;###autoload
 (defun helm-taskrunner-kill-all-buffers ()
-  "Kill all helm-taskrunner compilation buffers."
+  "Kill all `helm-taskrunner' compilation buffers."
   (interactive)
   (taskrunner-kill-compilation-buffers))
 
