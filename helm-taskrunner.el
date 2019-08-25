@@ -247,19 +247,9 @@ have to be retrieved, it might take several seconds."
   (interactive)
   (helm-taskrunner--check-if-in-project)
   (if (projectile-project-p)
-      ;; Check for the thread function explicitly instead of simply emacs-26
-      ;; since it might be compiled without threads(I think this is possible) If
-      ;; the thread functions are not available then use the `emacs-async'
-      ;; approach which spawns a separate process. Either way, the behaviour and
-      ;; output is consistent accross emacs versions
-      (if (and (fboundp 'make-thread)
-               (fboundp 'run-at-time))
-          (progn
-            (message "taskrunner: Using threads!")
-            (taskrunner-run-thread-function 'taskrunner-get-tasks-sync 'helm-taskrunner--run-helm-for-targets))
-        (progn
-          (message "taskrunner: Using async!")
-          (taskrunner-get-tasks-async 'helm-taskrunner--run-helm-for-targets)))
+      (progn
+        (message "taskrunner: Using async!")
+        (taskrunner-get-tasks-async 'helm-taskrunner--run-helm-for-targets))
     (message helm-taskrunner-project-warning)))
 
 ;;;###autoload
@@ -268,12 +258,7 @@ have to be retrieved, it might take several seconds."
   (interactive)
   (helm-taskrunner--check-if-in-project)
   (if (projectile-project-p)
-      (if (and (fboundp 'make-thread)
-               (fboundp 'run-at-time))
-          (progn
-            (message "Running thread update cache")
-            (taskrunner-run-thread-function 'taskrunner-refresh-cache-sync 'helm-taskrunner--run-helm-for-targets))
-        (taskrunner-refresh-cache-async 'helm-taskrunner--run-helm-for-targets))
+      (taskrunner-refresh-cache-async 'helm-taskrunner--run-helm-for-targets)
     (message helm-taskrunner-project-warning)))
 
 ;;;###autoload
