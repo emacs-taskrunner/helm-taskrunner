@@ -4,8 +4,8 @@
 
 ;; Author: Yavor Konstantinov <ykonstantinov1 AT gmail DOT com>
 ;; URL: https://github.com/emacs-taskrunner/helm-taskrunner
-;; Version: 1.0
-;; Package-Requires: ((emacs "25"))
+;; Version: 0.9
+;; Package-Requires: ((emacs "25.1"))
 ;; Keywords: build-system taskrunner build task-runner tasks helm convenience
 
 ;; This file is not part of GNU Emacs.
