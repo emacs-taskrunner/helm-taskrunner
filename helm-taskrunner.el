@@ -106,13 +106,16 @@ Please switch to a project which is recognized by projectile!"
   "helm-taskrunner: No taskrunner buffers are currently opened!"
   "Warning used to indicate that there are not task buffers opened.")
 
+;; Variable aliases for customizable variables used in the backend
 (defvaralias 'helm-taskrunner-preferred-js-package-manager 'taskrunner-preferred-js-package-manager)
 (defvaralias 'helm-taskrunner-get-all-make-targets 'taskrunner-retrieve-all-make-targets)
-(defvaralias 'helm-taskrunner-leiningen-buffer-name 'taskrunner-leiningen-buffer-name)
-(defvaralias 'helm-taskrunner-leiningen-task-section-regexp 'taskrunner-leiningen-task-section-header-regexp)
-(defvaralias 'helm-taskrunner-gradle-taskbuffer-name 'taskrunner-gradle-tasks-buffer-name)
 (defvaralias 'helm-taskrunner-gradle-heading-regexps 'taskrunner-gradle-heading-regexps)
-(defvaralias 'helm-taskrunner-ant-tasks-buffer-name 'taskrunner-ant-tasks-buffer-name)
+(defvaralias 'helm-taskrunner-build-dir-list 'taskrunner-build-dir-list)
+(defvaralias 'helm-taskrunner-source-dir-list 'taskrunner-source-dir-list)
+(defvaralias 'helm-taskrunner-go-task-bin-path 'taskrunner-go-task-bin-path)
+(defvaralias 'helm-taskrunner-mage-bin-path 'taskrunner-mage-bin-path)
+(defvaralias 'helm-taskrunner-doit-bin-path 'taskrunner-doit-bin-path)
+(defvaralias 'helm-taskrunner-no-previous-command-ran-warning 'taskrunner-no-previous-command-ran-warning)
 
 (defconst helm-taskrunner-action-list
   (helm-make-actions
