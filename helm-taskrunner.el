@@ -6,7 +6,7 @@
 ;; URL: https://github.com/emacs-taskrunner/helm-taskrunner
 ;; Version: 1.0
 ;; Package-Requires: ((emacs "24"))
-;; Keywords: build-system taskrunner build task-runner tasks helm
+;; Keywords: build-system taskrunner build task-runner tasks helm convenience
 
 ;; This file is not part of GNU Emacs.
 
@@ -149,39 +149,39 @@ Please switch to a project which is recognized by projectile!"
 (defun helm-taskrunner--root-task (TASK)
   "Run the task TASK in the project root without asking for extra args.
 This is the default command when selecting/running a task/target."
-  (taskrunner-run-task TASK))
+  (taskrunner-run-task TASK nil nil t))
 
 (defun helm-taskrunner--root-task-prompt (TASK)
   "Run the task TASK in the project root and ask the user for extra args."
-  (taskrunner-run-task TASK nil t))
+  (taskrunner-run-task TASK nil t t))
 
 (defun helm-taskrunner--current-dir (TASK)
   "Run the task TASK in the directory visited by the current buffer.
 Do not prompt the user to supply any extra arguments."
   (let ((curr-file (buffer-file-name)))
     (when curr-file
-      (taskrunner-run-task TASK (file-name-directory curr-file) nil))))
+      (taskrunner-run-task TASK (file-name-directory curr-file) nil t))))
 
 (defun helm-taskrunner--current-dir-prompt (TASK)
   "Run the task TASK in the directory visited by the current buffer.
 Prompt the user to supply extra arguments."
   (let ((curr-file (buffer-file-name)))
     (when curr-file
-      (taskrunner-run-task TASK (file-name-directory curr-file) t))))
+      (taskrunner-run-task TASK (file-name-directory curr-file) t t))))
 
 (defun helm-taskrunner--select-dir (TASK)
   "Run the task TASK in a directory chosen by the user."
   (let ((command-directory (read-directory-name "Directory: " (projectile-project-root))))
     (message command-directory)
     (when command-directory
-      (taskrunner-run-task TASK command-directory))))
+      (taskrunner-run-task TASK command-directory nil t))))
 
 (defun helm-taskrunner--select-dir-prompt (TASK)
   "Run the task TASK in a directory chosen by the user.
 Prompt the user to supply extra arguments."
   (let ((command-directory (read-directory-name "Directory: " (projectile-project-root))))
     (when command-directory
-      (taskrunner-run-task TASK command-directory t))))
+      (taskrunner-run-task TASK command-directory t t))))
 
 (defun helm-taskrunner--kill-buffer (BUFFER-NAME)
   "Kill the buffer name BUFFER-NAME."
@@ -273,12 +273,12 @@ have to be retrieved, it might take several seconds."
 (defun helm-taskrunner--open-file (FILENAME)
   "Open the file FILENAME.
 This function is meant to be used with helm only."
-  (setq helm-taskrunner--project-files  (car (alist-get (intern FILENAME) helm-taskrunner--project-files)))
+  (setq helm-taskrunner--project-files  (car (assoc (intern FILENAME) helm-taskrunner--project-files)))
   (find-file helm-taskrunner--project-files))
 
 (defun helm-taskrunner--select-system (SYS)
   "Retrive the files for the taskrunner/build system SYS."
-  (setq helm-taskrunner--project-files   (car (alist-get (intern SYS) helm-taskrunner--project-files)))
+  (setq helm-taskrunner--project-files   (car (assoc (intern SYS) helm-taskrunner--project-files)))
   (if (stringp helm-taskrunner--project-files)
       (find-file helm-taskrunner--project-files)
     (helm
