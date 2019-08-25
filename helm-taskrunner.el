@@ -174,7 +174,6 @@ Prompt the user to supply extra arguments."
 (defun helm-taskrunner--select-dir (TASK)
   "Run the task TASK in a directory chosen by the user."
   (let ((command-directory (read-directory-name "Directory: " (projectile-project-root))))
-    (message command-directory)
     (when command-directory
       (taskrunner-run-task TASK command-directory nil t))))
 
@@ -221,7 +220,8 @@ If TARGETS is nil then a warning is shown which mentions that no targets were fo
                      :action helm-taskrunner-action-list)
           :prompt "Task to run: "
           :buffer "*helm-taskrunner*"
-          :fuzzy helm-taskrunner-use-fuzzy-match)))
+          :fuzzy helm-taskrunner-use-fuzzy-match))
+  )
 
 ;;;###autoload
 (defun helm-taskrunner ()
