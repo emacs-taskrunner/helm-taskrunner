@@ -254,13 +254,12 @@ have to be retrieved, it might take several seconds."
       ;; output is consistent accross emacs versions
       (if (and (fboundp 'make-thread)
                (fboundp 'run-at-time))
-          (progn 
+          (progn
             (message "taskrunner: Using threads!")
             (taskrunner-run-thread-function 'taskrunner-get-tasks-sync 'helm-taskrunner--run-helm-for-targets))
         (progn
           (message "taskrunner: Using async!")
-          (taskrunner-get-tasks-async 'helm-taskrunner--run-helm-for-targets))
-        )
+          (taskrunner-get-tasks-async 'helm-taskrunner--run-helm-for-targets)))
     (message helm-taskrunner-project-warning)))
 
 ;;;###autoload
@@ -269,7 +268,12 @@ have to be retrieved, it might take several seconds."
   (interactive)
   (helm-taskrunner--check-if-in-project)
   (if (projectile-project-p)
-      (taskrunner-refresh-cache-async 'helm-taskrunner--run-helm-for-targets)
+      (if (and (fboundp 'make-thread)
+               (fboundp 'run-at-time))
+          (progn
+            (message "Running thread update cache")
+            (taskrunner-run-thread-function 'taskrunner-refresh-cache-sync 'helm-taskrunner--run-helm-for-targets))
+        (taskrunner-refresh-cache-async 'helm-taskrunner--run-helm-for-targets))
     (message helm-taskrunner-project-warning)))
 
 ;;;###autoload
