@@ -25,7 +25,6 @@
 
 ;; projectile
 ;; taskrunner
-;; async
 ;; helm
 
 ;; Then put this folder in your load-path, and put this in your init:
@@ -69,8 +68,8 @@
 ;;;; Requirements
 
 (require 'helm)
-(require 'async)
 (require 'taskrunner)
+(require 'cl-lib)
 
 (defgroup helm-taskrunner nil
   "Group for helm-taskrunner frontend."
@@ -283,9 +282,9 @@ This function is meant to be used with helm only."
       (find-file helm-taskrunner--project-files)
     (helm
      :sources (helm-build-sync-source "helm-taskrunner-files-source"
-                :candidates (map 'list (lambda (elem)
-                                         (car elem))
-                                 helm-taskrunner--project-files)
+                :candidates (cl-map 'list (lambda (elem)
+                                            (car elem))
+                                    helm-taskrunner--project-files)
                 :action '(("Select file: " . helm-taskrunner--open-file)))
      :prompt "Select a file: "
      :buffer "*helm-taskrunner-files*"
@@ -300,9 +299,9 @@ This function is meant to be used with helm only."
   (if helm-taskrunner--project-files
       (helm
        :sources (helm-build-sync-source "helm-taskrunner-files-source"
-                  :candidates (map 'list (lambda (elem)
-                                           (car elem))
-                                   helm-taskrunner--project-files)
+                  :candidates (cl-map 'list (lambda (elem)
+                                              (car elem))
+                                      helm-taskrunner--project-files)
                   :action '(("Select build system" . helm-taskrunner--select-system)))
        :prompt "Select a taskrunner: "
        :buffer "*helm-taskrunner-files*"
