@@ -45,6 +45,7 @@ There are several entry points for this package:
     few seconds. You are free to continue working until they do. If for some
     reason no tasks can be located, an error message will be displayed in the
     echo buffer.
+
     *Warning*: Whenever ~helm-taskrunner~ is used to run a command in another
     repository and the project is either one which uses ~Make~ , ~CMake~ or
     ~Meson/Ninja~ then the first four places(at project root, project root with
@@ -116,7 +117,18 @@ Some functions of interest are:
 - ~helm-taskrunner-mage-bin-path~: This variable contains the path used to
   locate the folder containing the golang binary for the [[https://github.com/magefile/mage][mage]] taskrunner. Its default is ~~/go/bin~.
 - ~helm-taskrunner-doit-bin-path~: This variable contains the path used to
-  locate the folder containing the binary for the [[https://github.com/pydoit/doit][doit]] taskrunner. Its default is ~~/.local/bin~.
+  locate the folder containing the binary for the
+  [[https://github.com/pydoit/doit][doit]] taskrunner. Its default is
+  ~~/.local/bin~.
+** Note about emacs-async and emacs26 threads
+This package works with a emacs 25 as a minimum require version. If emacs 26 and
+above is used and it is compiled with threading support then the provided
+threads are used. Otherwise, if emacs 25 or a larget version of emacs is used
+*without* threading support then the fallback behaviour is to use the ~emacs-async~
+package instead. The main difference between the two approaches is that the
+~emacs-async~ package spawns a new instance of emacs which the threads provided by
+emacs 26 and above run in the same instance. Either way, there isn't any
+difference in how ~helm-taskrunner~ functions to the end user.
 * Supported build/taskrunner systems
 The following systems are currently supported:
 - [X] yarn/npm
