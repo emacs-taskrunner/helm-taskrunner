@@ -14,6 +14,8 @@ killed and then loaded up again when emacs/helm-taskrunner is started.
  might miss some subtleties. If you have any advice then please feel free to
  open a pull request on the repository hosting the backend for this project
  which can be found [[https://github.com/emacs-taskrunner/emacs-taskrunner][here]]. Thanks!
+** helm-taskrunner in action
+GIF's coming soon
 * Installation
 ** MELPA
 This package will be submitted to melpa shortly.
@@ -117,18 +119,7 @@ Some functions of interest are:
 - ~helm-taskrunner-mage-bin-path~: This variable contains the path used to
   locate the folder containing the golang binary for the [[https://github.com/magefile/mage][mage]] taskrunner. Its default is ~~/go/bin~.
 - ~helm-taskrunner-doit-bin-path~: This variable contains the path used to
-  locate the folder containing the binary for the
-  [[https://github.com/pydoit/doit][doit]] taskrunner. Its default is
-  ~~/.local/bin~.
-** Note about emacs-async and emacs26 threads
-This package works with a emacs 25 as a minimum require version. If emacs 26 and
-above is used and it is compiled with threading support then the provided
-threads are used. Otherwise, if emacs 25 or a larget version of emacs is used
-*without* threading support then the fallback behaviour is to use the ~emacs-async~
-package instead. The main difference between the two approaches is that the
-~emacs-async~ package spawns a new instance of emacs which the threads provided by
-emacs 26 and above run in the same instance. Either way, there isn't any
-difference in how ~helm-taskrunner~ functions to the end user.
+  locate the folder containing the binary for the [[https://github.com/pydoit/doit][doit]] taskrunner. Its default is ~~/.local/bin~.
 * Supported build/taskrunner systems
 The following systems are currently supported:
 - [X] yarn/npm
@@ -155,6 +146,11 @@ The following systems are currently supported:
 - [X] stack(Limited Support)
 - [X] cabal(Limited Support)
 ** Planning to support
+*** Features
+- Multiple build folders
+- Limited history of commands ran in the repository visited
+- A global minor mode which fetches tasks whenever the user switches a project
+*** Systems
 - [ ] Apache maven
 - [ ] [[https://waf.io/][waf]] 
 - [ ] [[https://github.com/pantsbuild/pants][pants]] 
