@@ -98,6 +98,12 @@ Please switch to a project which is recognized by projectile!"
   :group 'helm-taskrunner
   :type 'string)
 
+(defcustom helm-taskrunner-prompt-before-show nil
+  "Whether or not to prompt the user before showing helm-taskrunner windon."
+  :group 'helm-taskrunner
+  :type 'boolean
+  :options '(t nil))
+
 (defcustom helm-taskrunner-use-fuzzy-match t
   "Variable used to enable/disable fuzzy matching for `helm-taskrunner' instances."
   :group 'helm-taskrunner
@@ -212,17 +218,26 @@ If it is not then prompt the user to select a project."
         (projectile-switch-project))
     t))
 
+;; TODO: Find a way not to replicate this code so much
 (defun helm-taskrunner--run-helm-for-targets (TARGETS)
   "Launch a Helm instance with candidates TARGETS.
 If TARGETS is nil then a warning is shown which mentions that no targets were found."
   (if (null TARGETS)
       (message helm-taskrunner-no-targets-found-warning)
-    (helm :sources (helm-build-sync-source "helm-taskrunner-tasks"
-                     :candidates TARGETS
-                     :action helm-taskrunner-action-list)
-          :prompt "Task to run: "
-          :buffer "*helm-taskrunner*"
-          :fuzzy helm-taskrunner-use-fuzzy-match)))
+    (if helm-taskrunner-prompt-before-show
+        (when (y-or-n-p "Show helm-taskrunner? ")
+          (helm :sources (helm-build-sync-source "helm-taskrunner-tasks"
+                           :candidates TARGETS
+                           :action helm-taskrunner-action-list)
+                :prompt "Task to run: "
+                :buffer "*helm-taskrunner*"
+                :fuzzy helm-taskrunner-use-fuzzy-match))
+      (helm :sources (helm-build-sync-source "helm-taskrunner-tasks"
+                       :candidates TARGETS
+                       :action helm-taskrunner-action-list)
+            :prompt "Task to run: "
+            :buffer "*helm-taskrunner*"
+            :fuzzy helm-taskrunner-use-fuzzy-match))))
 
 ;;;###autoload
 (defun helm-taskrunner ()
