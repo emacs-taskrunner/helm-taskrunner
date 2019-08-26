@@ -176,7 +176,6 @@ The following systems are currently supported:
 ** Planning to support
 *** Features
 - Multiple build folders
-- Limited history of commands ran in the repository visited
 - A global minor mode which fetches tasks whenever the user switches a project
 *** Systems
 - [ ] Apache maven
