@@ -75,6 +75,7 @@
 
 (defgroup helm-taskrunner nil
   "Group for helm-taskrunner frontend."
+  :prefix "helm-taskrunner-"
   :group 'convenience)
 
 ;;;; Variables
@@ -156,6 +157,7 @@ Please switch to a project which is recognized by projectile!"
 
 ;;;; Functions
 
+;; Functions which run tasks in a specific directory
 (defun helm-taskrunner--root-task (TASK)
   "Run the task TASK in the project root without asking for extra args.
 This is the default command when selecting/running a task/target."
@@ -328,6 +330,28 @@ This function is meant to be used with helm only."
        :buffer "*helm-taskrunner-files*"
        :default 'helm-taskrunner--get-config-file-paths)
     (message helm-taskrunner-no-files-found-warning)))
+
+(defcustom helm-taskrunner-command-history-empty-warning
+  "helm-taskrunner: Command history is empty!"
+  "Warning used to indicate that the command history is empty for the project."
+  :group 'helm-taskrunner)
+
+(defun helm-taskrunner-command-history ()
+  "Show the command history for the currently visited project."
+  (interactive)
+  (helm-taskrunner--check-if-in-project)
+  (if (projectile-project-p)
+      (let ((commands-ran (taskrunner-get-commands-from-history (projectile-project-root))))
+        (if commands-ran
+            (helm
+             :sources (helm-build-sync-source "helm-taskrunner-command-history"
+                        :candidates commands-ran
+                        :action 'helm-taskrunner-action-list)
+             :prompt "Command to run: "
+             :buffer "*helm-taskrunner-command-history*"
+             :fuzzy helm-taskrunner-use-fuzzy-match)
+          (message helm-taskrunner-command-history-empty-warning)))
+    (message helm-taskrunner-project-warning)))
 
 (provide 'helm-taskrunner)
 ;;; helm-taskrunner.el ends here
