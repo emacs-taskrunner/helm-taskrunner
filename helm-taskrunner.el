@@ -226,7 +226,11 @@ If it is not then prompt the user to select a project."
       (if (package-installed-p 'helm-projectile)
           (progn
             (require 'helm-projectile)
-            (helm-projectile-switch-project))
+            ;; This code will never be reached unless helm-projectile is
+            ;; installed but this is necessary in order to silence the
+            ;; bytecompiler warning
+            (when (fboundp 'helm-projectile-switch-project)
+              (helm-projectile-switch-project)))
         (projectile-switch-project))
     t))
 
