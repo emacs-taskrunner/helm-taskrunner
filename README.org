@@ -117,12 +117,12 @@ Some variables of interest are:
   build. If you use a different name for source directories then please append
   that to the list assigned to this variable.
 - ~helm-taskrunner-go-task-bin-path~: This variable contains the path used to
-  locate the folder containing the golang binary for the [[https://github.com/go-task/task][go-task]] taskrunner. Its default is ~~/go/bin~.
+  locate the folder containing the golang binary for the [[https://github.com/go-task/task][go-task]] taskrunner. Its default is ~/home/USER/go/bin~.
 - ~helm-taskrunner-mage-bin-path~: This variable contains the path used to
-  locate the folder containing the golang binary for the [[https://github.com/magefile/mage][mage]] taskrunner. Its default is ~~/go/bin~.
+  locate the folder containing the golang binary for the [[https://github.com/magefile/mage][mage]] taskrunner. Its default is ~/home/USER/go/bin~.
 - ~helm-taskrunner-doit-bin-path~: This variable contains the path used to locate
   the folder containing the binary for the [[https://github.com/pydoit/doit][doit]] taskrunner. Its default is
-  ~~/.local/bin~.
+  ~/home/USER/.local/bin~.
 - ~helm-taskrunner-command-history-size~: This variable controls the number of
   saved commands in the history cache. Its default value is 10.
 - ~helm-taskrunner-use-fuzzy-match~: Whether or not ~helm~ uses fuzzy-matching or
