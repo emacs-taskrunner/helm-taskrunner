@@ -37,10 +37,13 @@
 ;; tasks/targets in the project.  If you add new tasks then call
 ;; `helm-taskrunner-update-cache' to make sure that the newly added commands
 ;; will be shown.  You can use the command `helm-taskrunner-task-buffers' to
-;; show all buffers which were used to run a task.  If you would like to kill all
-;; buffers then you can use the command `helm-taskrunner-kill-all-buffers'
+;; show all buffers which were used to run a task.  If you would like to kill
+;; all buffers then you can use the command `helm-taskrunner-kill-all-buffers'
 ;; Additionally, if you would like to rerun the last ran command, use
-;; `helm-taskrunner-rerun-last-command'.
+;; `helm-taskrunner-rerun-last-command' If you would like to see which commands
+;; you have ran previously, you can call the command
+;; `helm-taskrunner-command-history' which will display a history of the latest
+;; ran commands.
 
 ;;;; Credits
 
@@ -75,6 +78,7 @@
 
 (defgroup helm-taskrunner nil
   "Group for helm-taskrunner frontend."
+  :prefix "helm-taskrunner-"
   :group 'convenience)
 
 ;;;; Variables
@@ -98,11 +102,23 @@ Please switch to a project which is recognized by projectile!"
   :group 'helm-taskrunner
   :type 'string)
 
+(defcustom helm-taskrunner-prompt-before-show nil
+  "Whether or not to prompt the user before showing `helm-taskrunner' windon."
+  :group 'helm-taskrunner
+  :type 'boolean
+  :options '(t nil))
+
 (defcustom helm-taskrunner-use-fuzzy-match t
   "Variable used to enable/disable fuzzy matching for `helm-taskrunner' instances."
   :group 'helm-taskrunner
   :type 'boolean
   :options '(nil t))
+
+(defcustom helm-taskrunner-command-history-empty-warning
+  "helm-taskrunner: Command history is empty!"
+  "Warning used to indicate that the command history is empty for the project."
+  :group 'helm-taskrunner
+  :type 'string)
 
 (defconst helm-taskrunner-no-buffers-warning
   "helm-taskrunner: No taskrunner buffers are currently opened!"
@@ -118,6 +134,7 @@ Please switch to a project which is recognized by projectile!"
 (defvaralias 'helm-taskrunner-mage-bin-path 'taskrunner-mage-bin-path)
 (defvaralias 'helm-taskrunner-doit-bin-path 'taskrunner-doit-bin-path)
 (defvaralias 'helm-taskrunner-no-previous-command-ran-warning 'taskrunner-no-previous-command-ran-warning)
+(defvaralias 'helm-taskrunner-command-history-size 'taskrunner-command-history-size)
 
 (defconst helm-taskrunner-action-list
   (helm-make-actions
@@ -150,6 +167,7 @@ Please switch to a project which is recognized by projectile!"
 
 ;;;; Functions
 
+;; Functions which run tasks in a specific directory
 (defun helm-taskrunner--root-task (TASK)
   "Run the task TASK in the project root without asking for extra args.
 This is the default command when selecting/running a task/target."
@@ -216,17 +234,26 @@ If it is not then prompt the user to select a project."
         (projectile-switch-project))
     t))
 
+;; TODO: Find a way not to replicate the helm code code so much
 (defun helm-taskrunner--run-helm-for-targets (TARGETS)
   "Launch a Helm instance with candidates TARGETS.
 If TARGETS is nil then a warning is shown which mentions that no targets were found."
   (if (null TARGETS)
       (message helm-taskrunner-no-targets-found-warning)
-    (helm :sources (helm-build-sync-source "helm-taskrunner-tasks"
-                     :candidates TARGETS
-                     :action helm-taskrunner-action-list)
-          :prompt "Task to run: "
-          :buffer "*helm-taskrunner*"
-          :fuzzy helm-taskrunner-use-fuzzy-match)))
+    (if helm-taskrunner-prompt-before-show
+        (when (y-or-n-p "Show helm-taskrunner? ")
+          (helm :sources (helm-build-sync-source "helm-taskrunner-tasks"
+                           :candidates TARGETS
+                           :action helm-taskrunner-action-list)
+                :prompt "Task to run: "
+                :buffer "*helm-taskrunner*"
+                :fuzzy helm-taskrunner-use-fuzzy-match))
+      (helm :sources (helm-build-sync-source "helm-taskrunner-tasks"
+                       :candidates TARGETS
+                       :action helm-taskrunner-action-list)
+            :prompt "Task to run: "
+            :buffer "*helm-taskrunner*"
+            :fuzzy helm-taskrunner-use-fuzzy-match))))
 
 ;;;###autoload
 (defun helm-taskrunner ()
@@ -241,16 +268,16 @@ have to be retrieved, it might take several seconds."
 
 ;;;###autoload
 (defun helm-taskrunner-update-cache ()
-  "Refresh the task cache for the current project and show all tasks."
-  (interactive)
-  (helm-taskrunner--check-if-in-project)
-  (if (projectile-project-p)
-      (taskrunner-refresh-cache-async 'helm-taskrunner--run-helm-for-targets)
-    (message helm-taskrunner-project-warning)))
+"Refresh the task cache for the current project and show all tasks."
+(interactive)
+(helm-taskrunner--check-if-in-project)
+(if (projectile-project-p)
+    (taskrunner-refresh-cache-async 'helm-taskrunner--run-helm-for-targets)
+  (message helm-taskrunner-project-warning)))
 
 ;;;###autoload
 (defun helm-taskrunner-rerun-last-command ()
-  "Rerun the last task ran in the currently visited project."
+  "Rerun the last command/task ran in the currently visited project."
   (interactive)
   (helm-taskrunner--check-if-in-project)
   (if (projectile-project-p)
@@ -277,6 +304,7 @@ have to be retrieved, it might take several seconds."
   (interactive)
   (taskrunner-kill-compilation-buffers))
 
+;; Functions related to opening config files
 (defun helm-taskrunner--open-file (FILENAME)
   "Open the file FILENAME.
 This function is meant to be used with helm only."
@@ -315,6 +343,25 @@ This function is meant to be used with helm only."
        :buffer "*helm-taskrunner-files*"
        :default 'helm-taskrunner--get-config-file-paths)
     (message helm-taskrunner-no-files-found-warning)))
+
+;; Functions related to command history
+;;;###autoload
+(defun helm-taskrunner-command-history ()
+  "Show the command history for the currently visited project."
+  (interactive)
+  (helm-taskrunner--check-if-in-project)
+  (if (projectile-project-p)
+      (let ((commands-ran (taskrunner-get-commands-from-history (projectile-project-root))))
+        (if commands-ran
+            (helm
+             :sources (helm-build-sync-source "helm-taskrunner-command-history"
+                        :candidates commands-ran
+                        :action 'helm-taskrunner-action-list)
+             :prompt "Command to run: "
+             :buffer "*helm-taskrunner-command-history*"
+             :fuzzy helm-taskrunner-use-fuzzy-match)
+          (message helm-taskrunner-command-history-empty-warning)))
+    (message helm-taskrunner-project-warning)))
 
 (provide 'helm-taskrunner)
 ;;; helm-taskrunner.el ends here
