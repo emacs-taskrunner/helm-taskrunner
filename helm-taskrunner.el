@@ -120,6 +120,19 @@ Please switch to a project which is recognized by projectile!"
   :group 'helm-taskrunner
   :type 'string)
 
+(defcustom helm-taskrunner-tasks-being-retrieved-warning
+  "helm-taskrunner: The tasks are currently being retrieved. They will be displayed when ready."
+  "Warning used to indicate that the tasks are being retrieved.
+This is only used when the minor mode is on."
+  :group 'helm-taskrunner
+  :type 'string)
+
+(defvar helm-taskrunner--retrieving-tasks-p nil
+  "Variable used to indicate if tasks are being retrieved in the background.")
+
+(defvar helm-taskrunner--tasks-queried-p nil
+  "Variable used to indicate if the user queried for tasks before they were ready.")
+
 (defconst helm-taskrunner-no-buffers-warning
   "helm-taskrunner: No taskrunner buffers are currently opened!"
   "Warning used to indicate that there are not task buffers opened.")
@@ -263,7 +276,12 @@ have to be retrieved, it might take several seconds."
   (interactive)
   (helm-taskrunner--check-if-in-project)
   (if (projectile-project-p)
-      (taskrunner-get-tasks-async 'helm-taskrunner--run-helm-for-targets)
+      (if (and helm-taskrunner-minor-mode
+               helm-taskrunner--retrieving-tasks-p)
+          (progn
+            (setq helm-taskrunner--tasks-queried-p t)
+            (message helm-taskrunner-tasks-being-retrieved-warning))
+        (taskrunner-get-tasks-async 'helm-taskrunner--run-helm-for-targets))
     (message helm-taskrunner-project-warning)))
 
 ;;;###autoload
@@ -362,6 +380,36 @@ This function is meant to be used with helm only."
              :fuzzy helm-taskrunner-use-fuzzy-match)
           (message helm-taskrunner-command-history-empty-warning)))
     (message helm-taskrunner-project-warning)))
+
+;; Minor mode related
+
+;; TODO: There might be an issue if the user switches projects too quickly(as in
+;; open one project and then directly open another). This might lead to the
+;; caches being corrupted.
+
+(defun helm-taskrunner--projectile-hook-function ()
+  "Collect tasks in the background when `projectile-switch-project' is called."
+  (setq helm-taskrunner--retrieving-tasks-p t)
+  (taskrunner-get-tasks-async (lambda (TARGETS)
+                                (setq helm-taskrunner--retrieving-tasks-p nil)
+                                ;; If the tasks were queried, show them to the user
+                                (when helm-taskrunner--tasks-queried-p
+                                  (setq helm-taskrunner--tasks-queried-p nil)
+                                  (helm-taskrunner--run-helm-for-targets TARGETS)))
+                              (projectile-project-root)))
+
+;; Thanks to Marcin Borkowski for the `:init-value' tip
+;; http://mbork.pl/2018-11-03_A_few_remarks_about_defining_minor_modes
+;;;###autoload
+(define-minor-mode helm-taskrunner-minor-mode
+  "Minor mode for asynchronously collecting project tasks when a project is switched to."
+  :init-value nil
+  :lighter " HT"
+  :global t
+  ;; Add/remove the hooks when minor mode is toggled on or off
+  (if helm-taskrunner-minor-mode
+      (add-hook 'projectile-after-switch-project-hook #'helm-taskrunner--projectile-hook-function)
+    (remove-hook 'projectile-after-switch-project-hook #'helm-taskrunner--projectile-hook-function)))
 
 (provide 'helm-taskrunner)
 ;;; helm-taskrunner.el ends here
