@@ -90,6 +90,21 @@ There are several entry points for this package:
   selection.
 - ~helm-taskrunner-command-history~: Show a helm instance filled with the latest
   commands ran in the current project.
+** Minor mode
+~helm-taskrunner~ comes with its own minor mode called
+~helm-taskrunner-minor-mode~. It is a global minor mode which attaches a function to
+the ~projectile-after-switch-project-hook~. When this minor mode is enabled, tasks
+for the currently visited project are retrieved in the background so they are
+ready whenever you need them. If you attempt to start ~helm-taskrunner~ while the
+tasks are being gathered in the background, a warning will be shown to let you
+know that they are not available at the moment. As soon as they are gathered, a
+~helm~ window will be shown which will let you choose from them. When this mode is
+toggled off, the function is removed from the hook.
+
+Using this minor mode is completely optional. The only benefit is that tasks are
+retrieved as soon as you switch to a project using ~projectile~.
+
+The minor mode will appear in the modeline as ~HT~.
 ** Variables
 Some variables of interest are:
 - ~helm-taskrunner-preferred-js-package-manager~: Choose if you prefer npm or
@@ -148,6 +163,9 @@ whatever you would like.
   items in the command history for the currently visited project.
 - ~helm-taskrunner-no-buffers-warning~: Warning used when there are not
   ~helm-taskrunner~ compilation buffers.
+- ~helm-taskrunner-tasks-being-retrieved-warning~: Warning used to indicate that
+  tasks are being retrieved in the background. It is only shown if the
+  ~helm-taskrunner-minor-mode~ is toggled on.
 * Supported build/taskrunner systems
 The following systems are currently supported:
 - [X] yarn/npm
