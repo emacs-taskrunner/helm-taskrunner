@@ -88,8 +88,10 @@ There are several entry points for this package:
   over again and displayed to the user. If you have added new tasks and do not
   see them then call this function to update the cache and include them for
   selection.
+- ~helm-taskrunner-command-history~: Show a helm instance filled with the latest
+  commands ran in the current project.
 ** Variables
-Some functions of interest are:
+Some variables of interest are:
 - ~helm-taskrunner-preferred-js-package-manager~: Choose if you prefer npm or
   yarn. This is usually deduced automatically depending on the presence of a
   ~package-lock.json~ file or ~yarn.lock~ file but if those are not found then this
@@ -118,8 +120,34 @@ Some functions of interest are:
   locate the folder containing the golang binary for the [[https://github.com/go-task/task][go-task]] taskrunner. Its default is ~~/go/bin~.
 - ~helm-taskrunner-mage-bin-path~: This variable contains the path used to
   locate the folder containing the golang binary for the [[https://github.com/magefile/mage][mage]] taskrunner. Its default is ~~/go/bin~.
-- ~helm-taskrunner-doit-bin-path~: This variable contains the path used to
-  locate the folder containing the binary for the [[https://github.com/pydoit/doit][doit]] taskrunner. Its default is ~~/.local/bin~.
+- ~helm-taskrunner-doit-bin-path~: This variable contains the path used to locate
+  the folder containing the binary for the [[https://github.com/pydoit/doit][doit]] taskrunner. Its default is
+  ~~/.local/bin~.
+- ~helm-taskrunner-command-history-size~: This variable controls the number of
+  saved commands in the history cache. Its default value is 10.
+- ~helm-taskrunner-use-fuzzy-match~: Whether or not ~helm~ uses fuzzy-matching or
+  not. Its default is ~t~.
+- ~helm-taskrunner-prompt-before-show~: The ~helm-taskrunner~ tasks/targets are
+  retrieved asynchronously. While this is being done, you are free to do what
+  you please(edit text, scroll around and so on). If you would like to be
+  prompted before the ~helm~ buffer is shown for selection(just in case you do not
+  end up typing into it) then set this to true. Its default is ~nil~.
+*** Warnings
+If English is not your preferred language then you can set these warnings to
+whatever you would like.
+- ~helm-taskrunner-no-previous-command-ran-warning~: This variable holds a string
+  which is displayed to the user when there is no previous command which can be
+  reran in the current project. Change this if you would like to see something different.
+- ~helm-taskrunner-project-warning~: Warning used when the currently visited
+  buffer is not in a  project recognized by ~projectile.~
+- ~helm-taskrunner-no-targets-found-warning~: Warning used when there have been no
+  targets/tasks found in the current project.
+- ~helm-taskrunner-no-files-found-warning~: Warning used when there have been no
+  configuration files found for the build/taskrunner system in the current project.
+- ~helm-taskrunner-command-history-empty-warning~: Warning used when there are no
+  items in the command history for the currently visited project.
+- ~helm-taskrunner-no-buffers-warning~: Warning used when there are not
+  ~helm-taskrunner~ compilation buffers.
 * Supported build/taskrunner systems
 The following systems are currently supported:
 - [X] yarn/npm

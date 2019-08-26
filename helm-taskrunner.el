@@ -37,10 +37,13 @@
 ;; tasks/targets in the project.  If you add new tasks then call
 ;; `helm-taskrunner-update-cache' to make sure that the newly added commands
 ;; will be shown.  You can use the command `helm-taskrunner-task-buffers' to
-;; show all buffers which were used to run a task.  If you would like to kill all
-;; buffers then you can use the command `helm-taskrunner-kill-all-buffers'
+;; show all buffers which were used to run a task.  If you would like to kill
+;; all buffers then you can use the command `helm-taskrunner-kill-all-buffers'
 ;; Additionally, if you would like to rerun the last ran command, use
-;; `helm-taskrunner-rerun-last-command'.
+;; `helm-taskrunner-rerun-last-command' If you would like to see which commands
+;; you have ran previously, you can call the command
+;; `helm-taskrunner-command-history' which will display a history of the latest
+;; ran commands.
 
 ;;;; Credits
 
@@ -131,6 +134,7 @@ Please switch to a project which is recognized by projectile!"
 (defvaralias 'helm-taskrunner-mage-bin-path 'taskrunner-mage-bin-path)
 (defvaralias 'helm-taskrunner-doit-bin-path 'taskrunner-doit-bin-path)
 (defvaralias 'helm-taskrunner-no-previous-command-ran-warning 'taskrunner-no-previous-command-ran-warning)
+(defvaralias 'helm-taskrunner-command-history-size 'taskrunner-command-history-size)
 
 (defconst helm-taskrunner-action-list
   (helm-make-actions
