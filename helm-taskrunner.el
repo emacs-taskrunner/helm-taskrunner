@@ -100,7 +100,7 @@ Please switch to a project which is recognized by projectile!"
   :type 'string)
 
 (defcustom helm-taskrunner-prompt-before-show nil
-  "Whether or not to prompt the user before showing helm-taskrunner windon."
+  "Whether or not to prompt the user before showing `helm-taskrunner' windon."
   :group 'helm-taskrunner
   :type 'boolean
   :options '(t nil))
@@ -110,6 +110,12 @@ Please switch to a project which is recognized by projectile!"
   :group 'helm-taskrunner
   :type 'boolean
   :options '(nil t))
+
+(defcustom helm-taskrunner-command-history-empty-warning
+  "helm-taskrunner: Command history is empty!"
+  "Warning used to indicate that the command history is empty for the project."
+  :group 'helm-taskrunner
+  :type 'string)
 
 (defconst helm-taskrunner-no-buffers-warning
   "helm-taskrunner: No taskrunner buffers are currently opened!"
@@ -249,23 +255,21 @@ have to be retrieved, it might take several seconds."
   (interactive)
   (helm-taskrunner--check-if-in-project)
   (if (projectile-project-p)
-      (progn
-        (message "taskrunner: Using async!")
-        (taskrunner-get-tasks-async 'helm-taskrunner--run-helm-for-targets))
+      (taskrunner-get-tasks-async 'helm-taskrunner--run-helm-for-targets)
     (message helm-taskrunner-project-warning)))
 
 ;;;###autoload
 (defun helm-taskrunner-update-cache ()
-  "Refresh the task cache for the current project and show all tasks."
-  (interactive)
-  (helm-taskrunner--check-if-in-project)
-  (if (projectile-project-p)
-      (taskrunner-refresh-cache-async 'helm-taskrunner--run-helm-for-targets)
-    (message helm-taskrunner-project-warning)))
+"Refresh the task cache for the current project and show all tasks."
+(interactive)
+(helm-taskrunner--check-if-in-project)
+(if (projectile-project-p)
+    (taskrunner-refresh-cache-async 'helm-taskrunner--run-helm-for-targets)
+  (message helm-taskrunner-project-warning)))
 
 ;;;###autoload
 (defun helm-taskrunner-rerun-last-command ()
-  "Rerun the last task ran in the currently visited project."
+  "Rerun the last command/task ran in the currently visited project."
   (interactive)
   (helm-taskrunner--check-if-in-project)
   (if (projectile-project-p)
@@ -292,6 +296,7 @@ have to be retrieved, it might take several seconds."
   (interactive)
   (taskrunner-kill-compilation-buffers))
 
+;; Functions related to opening config files
 (defun helm-taskrunner--open-file (FILENAME)
   "Open the file FILENAME.
 This function is meant to be used with helm only."
@@ -331,11 +336,8 @@ This function is meant to be used with helm only."
        :default 'helm-taskrunner--get-config-file-paths)
     (message helm-taskrunner-no-files-found-warning)))
 
-(defcustom helm-taskrunner-command-history-empty-warning
-  "helm-taskrunner: Command history is empty!"
-  "Warning used to indicate that the command history is empty for the project."
-  :group 'helm-taskrunner)
-
+;; Functions related to command history
+;;;###autoload
 (defun helm-taskrunner-command-history ()
   "Show the command history for the currently visited project."
   (interactive)
