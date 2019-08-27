@@ -15,7 +15,30 @@ killed and then loaded up again when emacs/helm-taskrunner is started.
  open a pull request on the repository hosting the backend for this project
  which can be found [[https://github.com/emacs-taskrunner/emacs-taskrunner][here]]. Thanks!
 ** helm-taskrunner in action
-GIF's coming soon
+*Disclaimer*: Collecting tasks and displaying them does not normally take as long
+as it does in these gif's below. This example was ran on the [[https://github.com/spring-projects/spring-framework][spring-framework]]
+and the ~gradle~ daemon takes a bit of time to initialize.
+
+[[file:docs/helm-no-prompt.gif]]
+
+You may have noticed that there is a slight problem. Tasks are ran in the
+background which leaves the user to edit/run commands as they wish. A problem
+might occur if you are typing and all the tasks/targets for the project have
+been gathered. This means that the menu will be displayed right away and you
+might type text into it which you did not mean to. If you would like to, you can
+set the variable ~helm-taskrunner-prompt-before-show~ to ~t~. Doing this will
+prompt you before showing tasks which have just been gathered. An example can be
+found below:
+
+[[file:docs/helm-prompt.gif]]
+
+If the tasks have been previously cached(as in, you have called ~helm-taskrunner~
+atleast once in the repository) then they will appear instantly and no prompt
+will be displayed. This means that enabling this option will not get in the way
+of operation for the majority of times.
+** Obligatory "What window manager/color theme are you using?"
+I am using ~i3wm~ with ~polybar~ for window manager/status bar combo.
+The theme used is ~gruvbox-theme~ and I am running the ~gruvbox-dark-soft~ version.
 * Installation
 ** MELPA
 This package will be submitted to melpa shortly.
@@ -145,8 +168,8 @@ Some variables of interest are:
 - ~helm-taskrunner-prompt-before-show~: The ~helm-taskrunner~ tasks/targets are
   retrieved asynchronously. While this is being done, you are free to do what
   you please(edit text, scroll around and so on). If you would like to be
-  prompted before the ~helm~ buffer is shown for selection(just in case you do not
-  end up typing into it) then set this to true. Its default is ~nil~.
+  prompted before the ~helm~ buffer is shown for selection when the targets are
+  not in the cache then set this variable to ~t~. Its default value is ~nil~.
 *** Warnings
 If English is not your preferred language then you can set these warnings to
 whatever you would like.
@@ -161,7 +184,7 @@ whatever you would like.
   configuration files found for the build/taskrunner system in the current project.
 - ~helm-taskrunner-command-history-empty-warning~: Warning used when there are no
   items in the command history for the currently visited project.
-- ~helm-taskrunner-no-buffers-warning~: Warning used when there are not
+- ~helm-taskrunner-no-buffers-warning~: Warning used when there are no 
   ~helm-taskrunner~ compilation buffers.
 - ~helm-taskrunner-tasks-being-retrieved-warning~: Warning used to indicate that
   tasks are being retrieved in the background. It is only shown if the

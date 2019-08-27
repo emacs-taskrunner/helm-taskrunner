@@ -83,6 +83,7 @@
 
 ;;;; Variables
 
+;; Customizable variables
 (defcustom helm-taskrunner-project-warning
   "helm-taskrunner: The currently visited buffer must be in a project in order to select a task!
 Please switch to a project which is recognized by projectile!"
@@ -127,15 +128,11 @@ This is only used when the minor mode is on."
   :group 'helm-taskrunner
   :type 'string)
 
-(defvar helm-taskrunner--retrieving-tasks-p nil
-  "Variable used to indicate if tasks are being retrieved in the background.")
-
-(defvar helm-taskrunner--tasks-queried-p nil
-  "Variable used to indicate if the user queried for tasks before they were ready.")
-
-(defconst helm-taskrunner-no-buffers-warning
+(defcustom helm-taskrunner-no-buffers-warning
   "helm-taskrunner: No taskrunner buffers are currently opened!"
-  "Warning used to indicate that there are not task buffers opened.")
+  "Warning used to indicate that there are not task buffers opened."
+  :group 'helm-taskrunner
+  :type 'string)
 
 ;; Variable aliases for customizable variables used in the backend
 (defvaralias 'helm-taskrunner-preferred-js-package-manager 'taskrunner-preferred-js-package-manager)
@@ -148,6 +145,20 @@ This is only used when the minor mode is on."
 (defvaralias 'helm-taskrunner-doit-bin-path 'taskrunner-doit-bin-path)
 (defvaralias 'helm-taskrunner-no-previous-command-ran-warning 'taskrunner-no-previous-command-ran-warning)
 (defvaralias 'helm-taskrunner-command-history-size 'taskrunner-command-history-size)
+
+;; Internal/non-public variables
+(defvar helm-taskrunner--retrieving-tasks-p nil
+  "Variable used to indicate if tasks are being retrieved in the background.")
+
+(defvar helm-taskrunner--tasks-queried-p nil
+  "Variable used to indicate if the user queried for tasks before they were ready.")
+
+(defvar helm-taskrunner--project-cached-p nil
+  "Stores the status of the project in the cache.
+Used to enable prompts before displaying `helm-taskrunner'.")
+
+(defvar helm-taskrunner--project-files '()
+  "Used to store the project files and their paths.")
 
 (defconst helm-taskrunner-action-list
   (helm-make-actions
@@ -174,9 +185,6 @@ This is only used when the minor mode is on."
    "Kill all buffers"
    'helm-taskrunner--kill-all-buffers)
   "Actions for `helm-taskrunner' buffer list.")
-
-(defvar helm-taskrunner--project-files '()
-  "Used to store the project files and their paths.")
 
 ;;;; Functions
 
@@ -247,41 +255,44 @@ If it is not then prompt the user to select a project."
         (projectile-switch-project))
     t))
 
-;; TODO: Find a way not to replicate the helm code code so much
+(defmacro helm-taskrunner--show-helm-task-instance (TARGET-LIST)
+  "Show in an instance of `helm' for TARGET-LIST."
+  `(helm :sources (helm-build-sync-source "helm-taskrunner-tasks"
+                    :candidates ,TARGET-LIST
+                    :action helm-taskrunner-action-list)
+         :prompt "Task to run: "
+         :buffer "*helm-taskrunner*"
+         :fuzzy helm-taskrunner-use-fuzzy-match))
+
 (defun helm-taskrunner--run-helm-for-targets (TARGETS)
-  "Launch a Helm instance with candidates TARGETS.
+  "Launch a `helm' instance with candidates TARGETS.
 If TARGETS is nil then a warning is shown which mentions that no targets were found."
   (if (null TARGETS)
       (message helm-taskrunner-no-targets-found-warning)
-    (if helm-taskrunner-prompt-before-show
+    ;; If the user wants a prompt and the project is not cached then ask to show
+    ;; when ready
+    (if (and helm-taskrunner-prompt-before-show
+             helm-taskrunner--project-cached-p)
         (when (y-or-n-p "Show helm-taskrunner? ")
-          (helm :sources (helm-build-sync-source "helm-taskrunner-tasks"
-                           :candidates TARGETS
-                           :action helm-taskrunner-action-list)
-                :prompt "Task to run: "
-                :buffer "*helm-taskrunner*"
-                :fuzzy helm-taskrunner-use-fuzzy-match))
-      (helm :sources (helm-build-sync-source "helm-taskrunner-tasks"
-                       :candidates TARGETS
-                       :action helm-taskrunner-action-list)
-            :prompt "Task to run: "
-            :buffer "*helm-taskrunner*"
-            :fuzzy helm-taskrunner-use-fuzzy-match))))
+          (helm-taskrunner--show-helm-task-instance TARGETS))
+      (helm-taskrunner--show-helm-task-instance TARGETS))))
 
 ;;;###autoload
 (defun helm-taskrunner ()
-  "Launch helm to select a task which is ran in the currently visited project.
+  "Launch `helm' to select a task which is ran in the currently visited project.
 This command runs asynchronously and depending on the number of tasks which
 have to be retrieved, it might take several seconds."
   (interactive)
   (helm-taskrunner--check-if-in-project)
   (if (projectile-project-p)
-      (if (and helm-taskrunner-minor-mode
-               helm-taskrunner--retrieving-tasks-p)
-          (progn
-            (setq helm-taskrunner--tasks-queried-p t)
-            (message helm-taskrunner-tasks-being-retrieved-warning))
-        (taskrunner-get-tasks-async 'helm-taskrunner--run-helm-for-targets))
+      (progn
+        (setq helm-taskrunner--project-cached-p (not (taskrunner-project-cached-p (projectile-project-root))))
+        (if (and helm-taskrunner-minor-mode
+                 helm-taskrunner--retrieving-tasks-p)
+            (progn
+              (setq helm-taskrunner--tasks-queried-p t)
+              (message helm-taskrunner-tasks-being-retrieved-warning))
+          (taskrunner-get-tasks-async 'helm-taskrunner--run-helm-for-targets)))
     (message helm-taskrunner-project-warning)))
 
 ;;;###autoload
