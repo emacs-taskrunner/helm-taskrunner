@@ -15,7 +15,7 @@ killed and then loaded up again when emacs/helm-taskrunner is started.
  open a pull request on the repository hosting the backend for this project
  which can be found [[https://github.com/emacs-taskrunner/emacs-taskrunner][here]]. Thanks!
 ** helm-taskrunner in action
-GIF's coming soon
+[[file:docs/helm-no-prompt.gif]]
 * Installation
 ** MELPA
 This package will be submitted to melpa shortly.
