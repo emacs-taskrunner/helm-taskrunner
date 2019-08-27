@@ -265,7 +265,7 @@ If it is not then prompt the user to select a project."
          :fuzzy helm-taskrunner-use-fuzzy-match))
 
 (defun helm-taskrunner--run-helm-for-targets (TARGETS)
-  "Launch a Helm instance with candidates TARGETS.
+  "Launch a `helm' instance with candidates TARGETS.
 If TARGETS is nil then a warning is shown which mentions that no targets were found."
   (if (null TARGETS)
       (message helm-taskrunner-no-targets-found-warning)
@@ -279,7 +279,7 @@ If TARGETS is nil then a warning is shown which mentions that no targets were fo
 
 ;;;###autoload
 (defun helm-taskrunner ()
-  "Launch helm to select a task which is ran in the currently visited project.
+  "Launch `helm' to select a task which is ran in the currently visited project.
 This command runs asynchronously and depending on the number of tasks which
 have to be retrieved, it might take several seconds."
   (interactive)
