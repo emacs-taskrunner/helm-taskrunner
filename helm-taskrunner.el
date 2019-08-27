@@ -247,26 +247,27 @@ If it is not then prompt the user to select a project."
         (projectile-switch-project))
     t))
 
-;; TODO: Find a way not to replicate the helm code code so much
+(defmacro helm-taskrunner--show-helm-task-instance (TARGET-LIST)
+  "Show in an instance of `helm' for TARGET-LIST."
+  `(helm :sources (helm-build-sync-source "helm-taskrunner-tasks"
+                    :candidates ,TARGET-LIST
+                    :action helm-taskrunner-action-list)
+         :prompt "Task to run: "
+         :buffer "*helm-taskrunner*"
+         :fuzzy helm-taskrunner-use-fuzzy-match))
+
 (defun helm-taskrunner--run-helm-for-targets (TARGETS)
   "Launch a Helm instance with candidates TARGETS.
 If TARGETS is nil then a warning is shown which mentions that no targets were found."
   (if (null TARGETS)
       (message helm-taskrunner-no-targets-found-warning)
-    (if helm-taskrunner-prompt-before-show
+    ;; If the user wants a prompt and the project is not cached then ask to show
+    ;; when ready
+    (if (and helm-taskrunner-prompt-before-show
+             (not (taskrunner-project-cached-p (projectile-project-root))))
         (when (y-or-n-p "Show helm-taskrunner? ")
-          (helm :sources (helm-build-sync-source "helm-taskrunner-tasks"
-                           :candidates TARGETS
-                           :action helm-taskrunner-action-list)
-                :prompt "Task to run: "
-                :buffer "*helm-taskrunner*"
-                :fuzzy helm-taskrunner-use-fuzzy-match))
-      (helm :sources (helm-build-sync-source "helm-taskrunner-tasks"
-                       :candidates TARGETS
-                       :action helm-taskrunner-action-list)
-            :prompt "Task to run: "
-            :buffer "*helm-taskrunner*"
-            :fuzzy helm-taskrunner-use-fuzzy-match))))
+          (helm-taskrunner--show-helm-task-instance TARGETS))
+      (helm-taskrunner--show-helm-task-instance TARGETS))))
 
 ;;;###autoload
 (defun helm-taskrunner ()
