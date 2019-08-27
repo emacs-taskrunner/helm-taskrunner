@@ -272,7 +272,7 @@ If TARGETS is nil then a warning is shown which mentions that no targets were fo
     ;; If the user wants a prompt and the project is not cached then ask to show
     ;; when ready
     (if (and helm-taskrunner-prompt-before-show
-             (not (taskrunner-project-cached-p (projectile-project-root))))
+             helm-taskrunner--project-cached-p)
         (when (y-or-n-p "Show helm-taskrunner? ")
           (helm-taskrunner--show-helm-task-instance TARGETS))
       (helm-taskrunner--show-helm-task-instance TARGETS))))
