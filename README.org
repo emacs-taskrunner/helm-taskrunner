@@ -15,6 +15,10 @@ killed and then loaded up again when emacs/helm-taskrunner is started.
  open a pull request on the repository hosting the backend for this project
  which can be found [[https://github.com/emacs-taskrunner/emacs-taskrunner][here]]. Thanks!
 ** helm-taskrunner in action
+*Disclaimer*: Collecting tasks and displaying them does not normally take as long
+as it does in these gif's below. This example was ran on the [[https://github.com/spring-projects/spring-framework][spring-framework]]
+and the ~gradle~ daemon takes a bit of time to initialize.
+
 [[file:docs/helm-no-prompt.gif]]
 
 You may have noticed that there is a slight problem. Tasks are ran in the
