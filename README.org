@@ -217,7 +217,6 @@ The following systems are currently supported:
 ** Planning to support
 *** Features
 - Multiple build folders
-- A global minor mode which fetches tasks whenever the user switches a project
 *** Systems
 - [ ] Apache maven
 - [ ] [[https://waf.io/][waf]] 
