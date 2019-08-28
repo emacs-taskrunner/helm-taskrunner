@@ -374,8 +374,11 @@ have to be retrieved, it might take several seconds."
     (message helm-taskrunner-project-warning)))
 
 ;;;###autoload
-(defun helm-taskrunner-delete-all-custom-commands ()
-  "Delete all custom commands for the currently visited project."
+(defun helm-taskrunner-delete-all-custom-commands (&optional TARGET)
+  "Delete all custom commands for the currently visited project.
+
+If TARGET is non-nil then delete all commands.  This is used for
+compatibility with Helm."
   (interactive)
   (helm-taskrunner--check-if-in-project)
   (if (projectile-project-p)
