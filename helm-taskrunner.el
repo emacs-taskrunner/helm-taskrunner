@@ -188,6 +188,36 @@ Used to enable prompts before displaying `helm-taskrunner'.")
 
 ;;;; Functions
 
+;; Minor mode related
+
+;; TODO: There might be an issue if the user switches projects too quickly(as in
+;; open one project and then directly open another). This might lead to the
+;; caches being corrupted.
+
+(defun helm-taskrunner--projectile-hook-function ()
+  "Collect tasks in the background when `projectile-switch-project' is called."
+  (setq helm-taskrunner--retrieving-tasks-p t)
+  (taskrunner-get-tasks-async (lambda (TARGETS)
+                                (setq helm-taskrunner--retrieving-tasks-p nil)
+                                ;; If the tasks were queried, show them to the user
+                                (when helm-taskrunner--tasks-queried-p
+                                  (setq helm-taskrunner--tasks-queried-p nil)
+                                  (helm-taskrunner--run-helm-for-targets TARGETS)))
+                              (projectile-project-root)))
+
+;; Thanks to Marcin Borkowski for the `:init-value' tip
+;; http://mbork.pl/2018-11-03_A_few_remarks_about_defining_minor_modes
+;;;###autoload
+(define-minor-mode helm-taskrunner-minor-mode
+  "Minor mode for asynchronously collecting project tasks when a project is switched to."
+  :init-value nil
+  :lighter " HT"
+  :global t
+  ;; Add/remove the hooks when minor mode is toggled on or off
+  (if helm-taskrunner-minor-mode
+      (add-hook 'projectile-after-switch-project-hook #'helm-taskrunner--projectile-hook-function)
+    (remove-hook 'projectile-after-switch-project-hook #'helm-taskrunner--projectile-hook-function)))
+
 ;; Functions which run tasks in a specific directory
 (defun helm-taskrunner--root-task (TASK)
   "Run the task TASK in the project root without asking for extra args.
@@ -337,12 +367,13 @@ have to be retrieved, it might take several seconds."
 (defun helm-taskrunner--open-file (FILENAME)
   "Open the file FILENAME.
 This function is meant to be used with helm only."
-  (setq helm-taskrunner--project-files  (car (assoc (intern FILENAME) helm-taskrunner--project-files)))
+  (setq helm-taskrunner--project-files  (car (alist-get (intern FILENAME) helm-taskrunner--project-files)))
   (find-file helm-taskrunner--project-files))
 
 (defun helm-taskrunner--select-system (SYS)
   "Retrive the files for the taskrunner/build system SYS."
-  (setq helm-taskrunner--project-files   (car (assoc (intern SYS) helm-taskrunner--project-files)))
+  (setq helm-taskrunner--project-files (car (alist-get (intern SYS) helm-taskrunner--project-files)))
+  (message "%s %s" SYS helm-taskrunner--project-files)
   (if (stringp helm-taskrunner--project-files)
       (find-file helm-taskrunner--project-files)
     (helm
@@ -391,37 +422,6 @@ This function is meant to be used with helm only."
              :fuzzy helm-taskrunner-use-fuzzy-match)
           (message helm-taskrunner-command-history-empty-warning)))
     (message helm-taskrunner-project-warning)))
-
-;; Minor mode related
-
-;; TODO: There might be an issue if the user switches projects too quickly(as in
-;; open one project and then directly open another). This might lead to the
-;; caches being corrupted.
-
-(defun helm-taskrunner--projectile-hook-function ()
-  "Collect tasks in the background when `projectile-switch-project' is called."
-  (setq helm-taskrunner--retrieving-tasks-p t)
-  (taskrunner-get-tasks-async (lambda (TARGETS)
-                                (setq helm-taskrunner--retrieving-tasks-p nil)
-                                ;; If the tasks were queried, show them to the user
-                                (when helm-taskrunner--tasks-queried-p
-                                  (setq helm-taskrunner--tasks-queried-p nil)
-                                  (helm-taskrunner--run-helm-for-targets TARGETS)))
-                              (projectile-project-root)))
-
-;; Thanks to Marcin Borkowski for the `:init-value' tip
-;; http://mbork.pl/2018-11-03_A_few_remarks_about_defining_minor_modes
-;;;###autoload
-(define-minor-mode helm-taskrunner-minor-mode
-  "Minor mode for asynchronously collecting project tasks when a project is switched to."
-  :init-value nil
-  :lighter " HT"
-  :global t
-  ;; Add/remove the hooks when minor mode is toggled on or off
-  (if helm-taskrunner-minor-mode
-      (add-hook 'projectile-after-switch-project-hook #'helm-taskrunner--projectile-hook-function)
-    (remove-hook 'projectile-after-switch-project-hook #'helm-taskrunner--projectile-hook-function)))
-
 
 ;; Notifications
 
