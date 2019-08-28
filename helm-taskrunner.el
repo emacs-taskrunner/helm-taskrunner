@@ -173,7 +173,11 @@ Used to enable prompts before displaying `helm-taskrunner'.")
    "Run task in another directory"
    'helm-taskrunner--select-dir
    "Run task in another directory and prompt for args"
-   'helm-taskrunner--select-dir-prompt)
+   'helm-taskrunner--select-dir-prompt
+   "Create custom command"
+   'helm-taskrunner--customize-command
+   "Delete all custom commands"
+   'helm-taskrunner-delete-all-custom-commands)
   "Actions for `helm-taskrunner'.")
 
 (defconst helm-taskrunner-buffer-action-list
@@ -326,7 +330,21 @@ have to be retrieved, it might take several seconds."
     (message helm-taskrunner-project-warning)))
 
 ;; Custom commands
-(defun helm-taskrunner-create-custom-command ()
+
+(defun helm-taskrunner--customize-command (COMMAND)
+  "Customize the command COMMAND and add it to cache."
+  (let* ((taskrunner-program (downcase (car (split-string COMMAND " "))))
+         ;; Concat the arguments since we might be rerunning a command with arguments from history
+         (task-name (mapconcat 'identity
+                               (cdr (split-string COMMAND " ")) " "))
+         (new-task-name (read-string "Arguments to add to command" task-name)))
+    (when new-task-name
+      (taskrunner-add-custom-command (projectile-project-root) (concat taskrunner-program " " new-task-name))
+      (when (y-or-n-p "Run new command? ")
+        (taskrunner-run-task (concat taskrunner-program " " new-task-name) (projectile-project-root) nil t)
+        )
+      )
+    )
   )
 
 (defun helm-taskrunner--delete-selected-command (COMMAND)
