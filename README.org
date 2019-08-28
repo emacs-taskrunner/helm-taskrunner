@@ -80,6 +80,11 @@ There are several entry points for this package:
     if there is a project where the command ~make build~ is invoked from a folder
     called ~~/my-project/some-folder~ then ~helm-taskrunner~ will call the command
     and run it in the directory ~~/my-project/build~.
+- ~helm-taskrunner-delete-custom-command~: This command will display a ~helm~ 
+  interface containing all of the custom commands for the project. You can then
+  select one and delete it.
+- ~helm-taskrunner-delete-all-custom-commands~: This command will delete *all* custom
+  commands for the project if any exist.
 - ~helm-taskrunner-buffers~: Every time a command is ran, a new buffer is spawned
   containing that commands output. This command displays a helm buffer letting
   the user select one of these command buffers and use an action on it. There
@@ -201,6 +206,8 @@ whatever you would like.
 - ~helm-taskrunner-tasks-being-retrieved-warning~: Warning used to indicate that
   tasks are being retrieved in the background. It is only shown if the
   ~helm-taskrunner-minor-mode~ is toggled on.
+- ~helm-taskrunner-custom-command-warning~: Warning used to indicate that the user
+  does not have any custom commands for the currently visited project.
 * Supported build/taskrunner systems
 The following systems are currently supported:
 - [X] yarn/npm

@@ -121,6 +121,12 @@ Please switch to a project which is recognized by projectile!"
   :group 'helm-taskrunner
   :type 'string)
 
+(defcustom helm-taskrunner-no-custom-commands-warning
+  "helm-taskrunner: There are no custom commands for this project!"
+  "Warning used to indicate that there are no custom commands for the project.."
+  :group 'helm-taskrunner
+  :type 'string)
+
 (defcustom helm-taskrunner-tasks-being-retrieved-warning
   "helm-taskrunner: The tasks are currently being retrieved. They will be displayed when ready."
   "Warning used to indicate that the tasks are being retrieved.
@@ -173,7 +179,11 @@ Used to enable prompts before displaying `helm-taskrunner'.")
    "Run task in another directory"
    'helm-taskrunner--select-dir
    "Run task in another directory and prompt for args"
-   'helm-taskrunner--select-dir-prompt)
+   'helm-taskrunner--select-dir-prompt
+   "Create custom command"
+   'helm-taskrunner--customize-command
+   "Delete all custom commands"
+   'helm-taskrunner-delete-all-custom-commands)
   "Actions for `helm-taskrunner'.")
 
 (defconst helm-taskrunner-buffer-action-list
@@ -269,19 +279,21 @@ one input."
   UNUSED
   (taskrunner-kill-compilation-buffers))
 
+;; https://github.com/emacs-taskrunner/ivy-taskrunner/issues/1
+;; This is used to silence the bytecompiler if a user installs the package
+;; without using package.el
+(declare-function helm-projectile-switch-project "ext:helm-projectile")
 
 (defun helm-taskrunner--check-if-in-project ()
   "Check if the currently visited buffer is in a project.
 If it is not then prompt the user to select a project."
   (if (not (projectile-project-p))
-      (if (package-installed-p 'helm-projectile)
-          (progn
-            (require 'helm-projectile)
-            ;; This code will never be reached unless helm-projectile is
-            ;; installed but this is necessary in order to silence the
-            ;; bytecompiler warning
-            (when (fboundp 'helm-projectile-switch-project)
-              (helm-projectile-switch-project)))
+      (if (require 'helm-projectile nil 'noerror)
+          ;; This code will never be reached unless helm-projectile is
+          ;; installed but this is necessary in order to silence the
+          ;; bytecompiler warning
+          (when (fboundp 'helm-projectile-switch-project)
+            (helm-projectile-switch-project))
         (projectile-switch-project))
     t))
 
@@ -325,14 +337,62 @@ have to be retrieved, it might take several seconds."
           (taskrunner-get-tasks-async 'helm-taskrunner--run-helm-for-targets)))
     (message helm-taskrunner-project-warning)))
 
+;; Custom commands
+
+(defun helm-taskrunner--customize-command (COMMAND)
+  "Customize the command COMMAND and add it to cache."
+  (let* ((taskrunner-program (car (split-string COMMAND " ")))
+         ;; Concat the arguments since we might be rerunning a command with arguments from history
+         (task-name (mapconcat 'identity
+                               (cdr (split-string COMMAND " ")) " "))
+         (new-task-name (read-string "Arguments to add to command: " task-name)))
+    (when new-task-name
+      (taskrunner-add-custom-command (projectile-project-root) (concat taskrunner-program " " new-task-name))
+      (when (y-or-n-p "Run new command? ")
+        (taskrunner-run-task (concat taskrunner-program " " new-task-name) (projectile-project-root) nil t)))))
+
+(defun helm-taskrunner--delete-selected-command (COMMAND)
+  "Remove the command COMMAND from the custom command cache."
+  (when COMMAND
+    (taskrunner-delete-custom-command (projectile-project-root) COMMAND)))
+
+;;;###autoload
+(defun helm-taskrunner-delete-custom-command ()
+  "Delete a custom command and remove it from the tasks output."
+  (interactive)
+  (helm-taskrunner--check-if-in-project)
+  (if (projectile-project-p)
+      (let ((custom-tasks (taskrunner-get-custom-commands (projectile-project-root))))
+        (if custom-tasks
+            (helm :sources (helm-build-sync-source "helm-taskrunner-custom-commands"
+                             :candidates custom-tasks
+                             :action (helm-make-actions
+                                      "Delete command"
+                                      'helm-taskrunner--delete-selected-command))
+                  :prompt "Command to remove: "
+                  :buffer "*helm-taskrunner-custom-commands*"
+                  :fuzzy helm-taskrunner-use-fuzzy-match)
+          (message helm-taskrunner-no-custom-commands-warning)))
+    (message helm-taskrunner-project-warning)))
+
+;;;###autoload
+(defun helm-taskrunner-delete-all-custom-commands (&optional _)
+  "Delete all custom commands for the currently visited project."
+  (interactive)
+  (helm-taskrunner--check-if-in-project)
+  (if (projectile-project-p)
+      (taskrunner-delete-all-custom-commands (projectile-project-root))
+    (message helm-taskrunner-project-warning)))
+
+;; Update caches
 ;;;###autoload
 (defun helm-taskrunner-update-cache ()
-"Refresh the task cache for the current project and show all tasks."
-(interactive)
-(helm-taskrunner--check-if-in-project)
-(if (projectile-project-p)
-    (taskrunner-refresh-cache-async 'helm-taskrunner--run-helm-for-targets)
-  (message helm-taskrunner-project-warning)))
+  "Refresh the task cache for the current project and show all tasks."
+  (interactive)
+  (helm-taskrunner--check-if-in-project)
+  (if (projectile-project-p)
+      (taskrunner-refresh-cache-async 'helm-taskrunner--run-helm-for-targets)
+    (message helm-taskrunner-project-warning)))
 
 ;;;###autoload
 (defun helm-taskrunner-rerun-last-command ()
@@ -373,7 +433,7 @@ This function is meant to be used with helm only."
 (defun helm-taskrunner--select-system (SYS)
   "Retrive the files for the taskrunner/build system SYS."
   (setq helm-taskrunner--project-files (car (alist-get (intern SYS) helm-taskrunner--project-files)))
-  (message "%s %s" SYS helm-taskrunner--project-files)
+  ;; (message "%s %s" SYS helm-taskrunner--project-files)
   (if (stringp helm-taskrunner--project-files)
       (find-file helm-taskrunner--project-files)
     (helm
