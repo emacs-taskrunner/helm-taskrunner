@@ -341,17 +341,14 @@ have to be retrieved, it might take several seconds."
     (when new-task-name
       (taskrunner-add-custom-command (projectile-project-root) (concat taskrunner-program " " new-task-name))
       (when (y-or-n-p "Run new command? ")
-        (taskrunner-run-task (concat taskrunner-program " " new-task-name) (projectile-project-root) nil t)
-        )
-      )
-    )
-  )
+        (taskrunner-run-task (concat taskrunner-program " " new-task-name) (projectile-project-root) nil t)))))
 
 (defun helm-taskrunner--delete-selected-command (COMMAND)
   "Remove the command COMMAND from the custom command cache."
   (when COMMAND
     (taskrunner-delete-custom-command (projectile-project-root) COMMAND)))
 
+;;;###autoload
 (defun helm-taskrunner-delete-custom-command ()
   "Delete a custom command and remove it from the tasks output."
   (interactive)
@@ -370,6 +367,7 @@ have to be retrieved, it might take several seconds."
           (message "No custom tasks for this project!")))
     (message helm-taskrunner-project-warning)))
 
+;;;###autoload
 (defun helm-taskrunner-delete-all-custom-commands ()
   "Delete all custom commands for the currently visited project."
   (interactive)
