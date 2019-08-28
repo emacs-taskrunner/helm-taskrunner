@@ -279,19 +279,21 @@ one input."
   UNUSED
   (taskrunner-kill-compilation-buffers))
 
+;; https://github.com/emacs-taskrunner/ivy-taskrunner/issues/1
+;; This is used to silence the bytecompiler if a user installs the package
+;; without using package.el
+(declare-function helm-projectile-switch-project "ext:helm-projectile")
 
 (defun helm-taskrunner--check-if-in-project ()
   "Check if the currently visited buffer is in a project.
 If it is not then prompt the user to select a project."
   (if (not (projectile-project-p))
-      (if (package-installed-p 'helm-projectile)
-          (progn
-            (require 'helm-projectile)
-            ;; This code will never be reached unless helm-projectile is
-            ;; installed but this is necessary in order to silence the
-            ;; bytecompiler warning
-            (when (fboundp 'helm-projectile-switch-project)
-              (helm-projectile-switch-project)))
+      (if (require 'helm-projectile nil 'noerror)
+          ;; This code will never be reached unless helm-projectile is
+          ;; installed but this is necessary in order to silence the
+          ;; bytecompiler warning
+          (when (fboundp 'helm-projectile-switch-project)
+            (helm-projectile-switch-project))
         (projectile-switch-project))
     t))
 
