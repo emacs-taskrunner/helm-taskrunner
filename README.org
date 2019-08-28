@@ -33,7 +33,7 @@ found below:
 [[file:docs/helm-prompt.gif]]
 
 If the tasks have been previously cached(as in, you have called ~helm-taskrunner~
-atleast once in the repository) then they will appear instantly and no prompt
+at least once in the repository) then they will appear instantly and no prompt
 will be displayed. This means that enabling this option will not get in the way
 of operation for the majority of times.
 ** Obligatory "What window manager/color theme are you using?"
@@ -46,16 +46,16 @@ This package will be submitted to melpa shortly.
 To install this package, you will need the following:
 
 - [[https://github.com/bbatsov/projectile][projectile]] 
-- [[https://github.com/bbatsov/helm-projectile][(OPTIONAL) helm-projectile]] 
 - [[https://github.com/emacs-helm/helm][Helm]] 
 - [[https://github.com/emacs-taskrunner/emacs-taskrunner][taskrunner]]
 - [[https://github.com/jwiegley/emacs-async][emacs-async]] 
+- [[https://github.com/bbatsov/helm-projectile][(OPTIONAL) helm-projectile]] 
 * Usage
 ** Functions
 There are several entry points for this package:
 - ~helm-taskrunner~: This function gathers all of the tasks from the
   taskrunners/build systems at the project root asynchronously. The tasks
-  gathered are then presented in a helm buffer where the user can select one of
+  gathered are then presented in a ~helm~ buffer where the user can select one of
   them to run. The tasks can be ran in 6 different places:
   - at project root
   - at project root with extra arguments supplied by the user
@@ -66,7 +66,7 @@ There are several entry points for this package:
   - at a custom directory selected by the user with extra arguments supplied by
     the user
     
-    *Warning*: This function is asynchronous so the tasks might now appear for a
+    *Warning*: This function is asynchronous so the tasks might not appear for a
     few seconds. You are free to continue working until they do. If for some
     reason no tasks can be located, an error message will be displayed in the
     echo buffer.
@@ -90,7 +90,7 @@ There are several entry points for this package:
 - ~helm-taskrunner-kill-all-buffers~: Kill all command buffers.
 - ~helm-taskrunner-config-files~: The majority of taskrunner/build systems have
   some type of a configuration file associate with them(Make -> Makefile, Grunt
-  -> gruntfile and so on...). When this function is invoked, a helm buffer will
+  -> gruntfile and so on...). When this function is invoked, a ~helm~ buffer will
   display all configuration files for all build/taskrunner systems detected at
   project root. The user can then select one of them and the file will be
   opened. This function will also work for build/taskrunner systems which have
@@ -103,14 +103,14 @@ There are several entry points for this package:
   command will be ran there again.
 - ~helm-taskrunner-update-cache~: To speed up the task process and minimize wait
   time for the user, helm-taskrunner uses a cache for targets/tasks
-  collected. When the ~helm-taskrunner~ command is called, the cache is
-  checked. If the tasks have been cached then they are returned immediately and
-  displayed to the user. Sometimes, more tasks can be added to the configuration
-  files of the taskrunner/build system and they will not be displayed. When this
-  command is called, the cache is overwritten and the tasks are gathered all
-  over again and displayed to the user. If you have added new tasks and do not
-  see them then call this function to update the cache and include them for
-  selection.
+  collected(located in the user Emacs directory). When the ~helm-taskrunner~
+  command is called, the cache is checked. If the tasks have been cached then
+  they are returned immediately and displayed to the user. Sometimes, new tasks
+  are added to the configuration files of the taskrunner/build system and
+  they will not be displayed. When this command is called, the cache is
+  overwritten and the tasks are gathered all over again and displayed to the
+  user. If you have added new tasks and do not see them then call this function
+  to update the cache and include them for selection.
 - ~helm-taskrunner-command-history~: Show a helm instance filled with the latest
   commands ran in the current project. From this point, you can select a command
   and re-run it wherever you would like.
@@ -119,7 +119,9 @@ There are several entry points for this package:
  which is compiled with notifications. If you put these in your ~init~ file and
  then use the file with an emacs which is not configured for this then calling
  these will throw an error since the functions below will not be available in
- the namespace.
+ the namespace. Additionally, I have not tested the notifications popup on
+ Windows or MacOS so if you have any trouble then please file a bug report.
+
 - ~helm-taskrunner-notifications-on~: Turn on notifications which are shown when a
   task is finished running.
 - ~helm-taskrunner-notifications-off~: Turn off notifications.
