@@ -333,11 +333,11 @@ have to be retrieved, it might take several seconds."
 
 (defun helm-taskrunner--customize-command (COMMAND)
   "Customize the command COMMAND and add it to cache."
-  (let* ((taskrunner-program (downcase (car (split-string COMMAND " "))))
+  (let* ((taskrunner-program (car (split-string COMMAND " ")))
          ;; Concat the arguments since we might be rerunning a command with arguments from history
          (task-name (mapconcat 'identity
                                (cdr (split-string COMMAND " ")) " "))
-         (new-task-name (read-string "Arguments to add to command" task-name)))
+         (new-task-name (read-string "Arguments to add to command: " task-name)))
     (when new-task-name
       (taskrunner-add-custom-command (projectile-project-root) (concat taskrunner-program " " new-task-name))
       (when (y-or-n-p "Run new command? ")
