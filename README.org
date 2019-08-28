@@ -112,7 +112,17 @@ There are several entry points for this package:
   see them then call this function to update the cache and include them for
   selection.
 - ~helm-taskrunner-command-history~: Show a helm instance filled with the latest
-  commands ran in the current project.
+  commands ran in the current project. From this point, you can select a command
+  and re-run it wherever you would like.
+  
+*Warning*: The functions below are only available if you are running an Emacs
+ which is compiled with notifications. If you put these in your ~init~ file and
+ then use the file with an emacs which is not configured for this then calling
+ these will throw an error since the functions below will not be available in
+ the namespace.
+- ~helm-taskrunner-notifications-on~: Turn on notifications which are shown when a
+  task is finished running.
+- ~helm-taskrunner-notifications-off~: Turn off notifications.
 ** Minor mode
 ~helm-taskrunner~ comes with its own minor mode called
 ~helm-taskrunner-minor-mode~. It is a global minor mode which attaches a function to
@@ -209,6 +219,9 @@ The following systems are currently supported:
 - [X] [[https://github.com/jakedeichert/mask][mask]] 
 - [X] [[https://github.com/casey/just][just]] 
 - [X] [[https://github.com/sagiegurari/cargo-make][cargo-make]]
+- [X] [[https://buidler.dev/][buidler]] 
+- [X] [[https://github.com/rliebz/tusk][Tusk]] 
+- [X] [[https://dnephin.github.io/dobi/install.html][dobi]] 
 - [X] cargo(Limited Support)
 - [X] go compiler(Limited support)
 - [X] Cask(Limited Support)
@@ -221,6 +234,8 @@ The following systems are currently supported:
 - [ ] Apache maven
 - [ ] [[https://waf.io/][waf]] 
 - [ ] [[https://github.com/pantsbuild/pants][pants]] 
+- [ ] [[https://github.com/reisraff/phulp][phulp]] 
+- [ ] [[https://github.com/zaaack/foy][foy]] 
 - [ ] tasks.json(VSCode)
 - [ ] Ninja
 - [ ] sbt
