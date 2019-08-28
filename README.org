@@ -113,7 +113,7 @@ There are several entry points for this package:
   selection.
 - ~helm-taskrunner-command-history~: Show a helm instance filled with the latest
   commands ran in the current project. From this point, you can select a command
-  and re run it wherever you would like.
+  and re-run it wherever you would like.
   
 *Warning*: The functions below are only available if you are running an Emacs
  which is compiled with notifications. If you put these in your ~init~ file and
