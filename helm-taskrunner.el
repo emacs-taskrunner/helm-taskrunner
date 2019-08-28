@@ -121,6 +121,12 @@ Please switch to a project which is recognized by projectile!"
   :group 'helm-taskrunner
   :type 'string)
 
+(defcustom helm-taskrunner-no-custom-commands-warning
+  "helm-taskrunner: There are no custom commands for this project!"
+  "Warning used to indicate that there are no custom commands for the project.."
+  :group 'helm-taskrunner
+  :type 'string)
+
 (defcustom helm-taskrunner-tasks-being-retrieved-warning
   "helm-taskrunner: The tasks are currently being retrieved. They will be displayed when ready."
   "Warning used to indicate that the tasks are being retrieved.
@@ -364,7 +370,7 @@ have to be retrieved, it might take several seconds."
                   :prompt "Command to remove: "
                   :buffer "*helm-taskrunner-custom-commands*"
                   :fuzzy helm-taskrunner-use-fuzzy-match)
-          (message "No custom tasks for this project!")))
+          (message helm-taskrunner-no-custom-commands-warning)))
     (message helm-taskrunner-project-warning)))
 
 ;;;###autoload
@@ -425,7 +431,7 @@ This function is meant to be used with helm only."
 (defun helm-taskrunner--select-system (SYS)
   "Retrive the files for the taskrunner/build system SYS."
   (setq helm-taskrunner--project-files (car (alist-get (intern SYS) helm-taskrunner--project-files)))
-  (message "%s %s" SYS helm-taskrunner--project-files)
+  ;; (message "%s %s" SYS helm-taskrunner--project-files)
   (if (stringp helm-taskrunner--project-files)
       (find-file helm-taskrunner--project-files)
     (helm
