@@ -361,7 +361,9 @@ have to be retrieved, it might take several seconds."
         (if custom-tasks
             (helm :sources (helm-build-sync-source "helm-taskrunner-custom-commands"
                              :candidates custom-tasks
-                             :action '(("Delete command" 'helm-taskrunner--delete-selected-command)))
+                             :action (helm-make-actions
+                                      "Delete command"
+                                      'helm-taskrunner--delete-selected-command))
                   :prompt "Command to remove: "
                   :buffer "*helm-taskrunner-custom-commands*"
                   :fuzzy helm-taskrunner-use-fuzzy-match)
