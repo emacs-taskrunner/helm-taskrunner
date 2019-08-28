@@ -422,5 +422,21 @@ This function is meant to be used with helm only."
       (add-hook 'projectile-after-switch-project-hook #'helm-taskrunner--projectile-hook-function)
     (remove-hook 'projectile-after-switch-project-hook #'helm-taskrunner--projectile-hook-function)))
 
+
+;; Notifications
+
+;; If the compilation function is present then that means that the Emacs using
+;; this package has notifications
+(when (fboundp 'taskrunner--compilation-notification)
+  (defun helm-taskrunner-notifications-on ()
+    "Turn on `helm-taskrunner' desktop notifications when a task is finished."
+    (interactive)
+    (taskrunner-notification-on))
+
+  (defun helm-taskrunner-notifications-off ()
+    "Turn off `helm-taskrunner' desktop notifications when a task is finished."
+    (interactive)
+    (taskrunner-notification-off)))
+
 (provide 'helm-taskrunner)
 ;;; helm-taskrunner.el ends here
