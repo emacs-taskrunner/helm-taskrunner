@@ -423,6 +423,13 @@ This function is meant to be used with helm only."
           (message helm-taskrunner-command-history-empty-warning)))
     (message helm-taskrunner-project-warning)))
 
+;; Cache cleanup
+(defun helm-taskrunner-clean-up-projects ()
+  "Remove all projects which do not exist anymore from the caches.
+This command will overwrite the cache file."
+  (interactive)
+  (taskrunner-clean-up-projects))
+
 ;; Notifications
 
 ;; If the compilation function is present then that means that the Emacs using
