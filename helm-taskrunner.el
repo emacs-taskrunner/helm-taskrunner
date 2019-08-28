@@ -325,14 +325,48 @@ have to be retrieved, it might take several seconds."
           (taskrunner-get-tasks-async 'helm-taskrunner--run-helm-for-targets)))
     (message helm-taskrunner-project-warning)))
 
+;; Custom commands
+(defun helm-taskrunner-create-custom-command ()
+  )
+
+(defun helm-taskrunner--delete-selected-command (COMMAND)
+  "Remove the command COMMAND from the custom command cache."
+  (when COMMAND
+    (taskrunner-delete-custom-command (projectile-project-root) COMMAND)))
+
+(defun helm-taskrunner-delete-custom-command ()
+  "Delete a custom command and remove it from the tasks output."
+  (interactive)
+  (helm-taskrunner--check-if-in-project)
+  (if (projectile-project-p)
+      (let ((custom-tasks (taskrunner-get-custom-commands (projectile-project-root))))
+        (if custom-tasks
+            (helm :sources (helm-build-sync-source "helm-taskrunner-custom-commands"
+                             :candidates custom-tasks
+                             :action '(("Delete command" 'helm-taskrunner--delete-selected-command)))
+                  :prompt "Command to remove: "
+                  :buffer "*helm-taskrunner-custom-commands*"
+                  :fuzzy helm-taskrunner-use-fuzzy-match)
+          (message "No custom tasks for this project!")))
+    (message helm-taskrunner-project-warning)))
+
+(defun helm-taskrunner-delete-all-custom-commands ()
+  "Delete all custom commands for the currently visited project."
+  (interactive)
+  (helm-taskrunner--check-if-in-project)
+  (if (projectile-project-p)
+      (taskrunner-delete-all-custom-commands (projectile-project-root))
+    (message helm-taskrunner-project-warning)))
+
+;; Update caches
 ;;;###autoload
 (defun helm-taskrunner-update-cache ()
-"Refresh the task cache for the current project and show all tasks."
-(interactive)
-(helm-taskrunner--check-if-in-project)
-(if (projectile-project-p)
-    (taskrunner-refresh-cache-async 'helm-taskrunner--run-helm-for-targets)
-  (message helm-taskrunner-project-warning)))
+  "Refresh the task cache for the current project and show all tasks."
+  (interactive)
+  (helm-taskrunner--check-if-in-project)
+  (if (projectile-project-p)
+      (taskrunner-refresh-cache-async 'helm-taskrunner--run-helm-for-targets)
+    (message helm-taskrunner-project-warning)))
 
 ;;;###autoload
 (defun helm-taskrunner-rerun-last-command ()
