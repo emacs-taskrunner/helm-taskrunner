@@ -291,11 +291,7 @@ one input."
 If it is not then prompt the user to select a project."
   (if (not (projectile-project-p))
       (if (require 'helm-projectile nil 'noerror)
-          ;; This code will never be reached unless helm-projectile is
-          ;; installed but this is necessary in order to silence the
-          ;; bytecompiler warning
-          (when (fboundp 'helm-projectile-switch-project)
-            (helm-projectile-switch-project))
+          (helm-projectile-switch-project)
         (projectile-switch-project))
     t))
 
