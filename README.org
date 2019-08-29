@@ -4,10 +4,12 @@ a convenient way to select targets/tasks within the current project and run them
 in a custom compilation buffer.
 
 The majority of the tasks/targets are gathered by either parsing
-files(makefiles) or parsing the output of the taskrunner/build systems. This can
-sometimes be a bit slow but this is made to be a (usually) one time cost. All
-tasks retrieved are saved in a cache which persists after an emacs instance is
-killed and then loaded up again when emacs/helm-taskrunner is started.
+files(makefiles) or parsing the output of the taskrunner/build systems which
+have the ability to list all targets/tasks in the project. This can sometimes be
+a bit slow but this is made to be a (usually) one time cost and is
+asynchronous. All tasks retrieved are saved in a cache which persists after an
+Emacs instance is killed and then loaded up again when emacs/ivy-taskrunner is
+started.
 
 *Warning*: I have not worked with most of these build systems/taskrunners but
  support has been provided for them. Since my knowledge is fairly elementary, I
@@ -73,13 +75,14 @@ There are several entry points for this package:
 
     *Warning*: Whenever ~helm-taskrunner~ is used to run a command in another
     repository and the project is either one which uses ~Make~ , ~CMake~ or
-    ~Meson/Ninja~ then the first four places(at project root, project root with
+    ~Meson/Ninja~ then the first four options(at project root, project root with
     args, currently visited directory and currently visited directory with args)
     will always use the build folder path locted by ~helm-taskrunner~. This means
-    that using the currently visited directory will be ignored. This means that
-    if there is a project where the command ~make build~ is invoked from a folder
-    called ~~/my-project/some-folder~ then ~helm-taskrunner~ will call the command
-    and run it in the directory ~~/my-project/build~.
+    that using the currently visited directory will be ignored. This also means
+    that if there is a project where the command ~make build~ is invoked from a
+    folder called ~~/my-project/some-folder~ then ~helm-taskrunner~ will call the
+    command and run it in the directory ~~/my-project/build~ (or whatever build
+    folder name is detected).
 - ~helm-taskrunner-delete-custom-command~: This command will display a ~helm~ 
   interface containing all of the custom commands for the project. You can then
   select one and delete it.
@@ -217,7 +220,7 @@ The following systems are currently supported:
 - [X] Jake
 - [X] Apache ant
 - [X] mix
-- [X] leinengen
+- [X] leiningen
 - [X] rake
 - [X] Make
 - [X] CMake
@@ -238,7 +241,13 @@ The following systems are currently supported:
 - [X] cabal(Limited Support)
 ** Planning to support
 *** Features
-- Multiple build folders
+- [ ] Multiple build folders
+- [ ] Add shallow/deep support. Deep support will use ripgrep/ag/grep(whichever
+  one is available in that order) and shallow support will work very similarly
+  to the way it is done now. This is if the user does not have any of those
+  installed or they would not like to spawn too many ripgrep/ag/find processes
+  on their system which will scan the project root. Deep support will probably
+  be enabled by default but the user will still be able to override this behaviour
 *** Systems
 - [ ] Apache maven
 - [ ] [[https://waf.io/][waf]] 

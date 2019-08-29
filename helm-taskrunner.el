@@ -4,8 +4,8 @@
 
 ;; Author: Yavor Konstantinov <ykonstantinov1 AT gmail DOT com>
 ;; URL: https://github.com/emacs-taskrunner/helm-taskrunner
-;; Version: 0.9
-;; Package-Requires: ((emacs "25.1"))
+;; Version: 1.0
+;; Package-Requires: ((emacs "25.1") (projectile "2.0.0") (helm "v3.0"))
 ;; Keywords: build-system taskrunner build task-runner tasks helm convenience
 
 ;; This file is not part of GNU Emacs.
@@ -73,6 +73,8 @@
 ;;;; Requirements
 
 (require 'helm)
+(require 'helm-source)
+(require 'projectile)
 (require 'taskrunner)
 (require 'cl-lib)
 
@@ -289,11 +291,7 @@ one input."
 If it is not then prompt the user to select a project."
   (if (not (projectile-project-p))
       (if (require 'helm-projectile nil 'noerror)
-          ;; This code will never be reached unless helm-projectile is
-          ;; installed but this is necessary in order to silence the
-          ;; bytecompiler warning
-          (when (fboundp 'helm-projectile-switch-project)
-            (helm-projectile-switch-project))
+          (helm-projectile-switch-project)
         (projectile-switch-project))
     t))
 
