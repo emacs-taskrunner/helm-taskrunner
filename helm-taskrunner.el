@@ -170,9 +170,13 @@ Used to enable prompts before displaying `helm-taskrunner'.")
 
 (defconst helm-taskrunner-action-list
   (helm-make-actions
-   "Run task in root without args"
+   "Run task"
+   'helm-taskrunner--run-task
+   "Run task and prompt for args"
+   'helm-taskrunner--run-task-prompt
+   "Run task in project root without args"
    'helm-taskrunner--root-task
-   "Run task in root and prompt for args"
+   "Run task in project root and prompt for args"
    'helm-taskrunner--root-task-prompt
    "Run task in current directory without args"
    'helm-taskrunner--current-dir
@@ -231,41 +235,49 @@ Used to enable prompts before displaying `helm-taskrunner'.")
     (remove-hook 'projectile-after-switch-project-hook #'helm-taskrunner--projectile-hook-function)))
 
 ;; Functions which run tasks in a specific directory
+(defun helm-taskrunner--run-task (TASK)
+  "Run the task TASK."
+  (taskrunner-parse-and-run-task TASK nil nil nil))
+
+(defun helm-taskrunner--run-task-prompt (TASK)
+  "Run the task TASK and prompt the user to supply extra arguments."
+  (taskrunner-parse-and-run-task TASK t nil nil))
+
 (defun helm-taskrunner--root-task (TASK)
   "Run the task TASK in the project root without asking for extra args.
 This is the default command when selecting/running a task/target."
-  (taskrunner-run-task TASK nil nil t))
+  (taskrunner-parse-and-run-task TASK (projectile-project-root) nil nil))
 
 (defun helm-taskrunner--root-task-prompt (TASK)
   "Run the task TASK in the project root and ask the user for extra args."
-  (taskrunner-run-task TASK nil t t))
+  (taskrunner-parse-and-run-task TASK (projectile-project-root) t nil))
 
 (defun helm-taskrunner--current-dir (TASK)
   "Run the task TASK in the directory visited by the current buffer.
 Do not prompt the user to supply any extra arguments."
   (let ((curr-file (buffer-file-name)))
     (when curr-file
-      (taskrunner-run-task TASK (file-name-directory curr-file) nil t))))
+      (taskrunner-parse-and-run-task TASK (file-name-directory curr-file) nil t))))
 
 (defun helm-taskrunner--current-dir-prompt (TASK)
   "Run the task TASK in the directory visited by the current buffer.
 Prompt the user to supply extra arguments."
   (let ((curr-file (buffer-file-name)))
     (when curr-file
-      (taskrunner-run-task TASK (file-name-directory curr-file) t t))))
+      (taskrunner-parse-and-run-task TASK (file-name-directory curr-file) t t))))
 
 (defun helm-taskrunner--select-dir (TASK)
   "Run the task TASK in a directory chosen by the user."
   (let ((command-directory (read-directory-name "Directory: " (projectile-project-root))))
     (when command-directory
-      (taskrunner-run-task TASK command-directory nil t))))
+      (taskrunner-parse-and-run-task TASK command-directory nil t))))
 
 (defun helm-taskrunner--select-dir-prompt (TASK)
   "Run the task TASK in a directory chosen by the user.
 Prompt the user to supply extra arguments."
   (let ((command-directory (read-directory-name "Directory: " (projectile-project-root))))
     (when command-directory
-      (taskrunner-run-task TASK command-directory t t))))
+      (taskrunner-parse-and-run-task TASK command-directory t t))))
 
 (defun helm-taskrunner--kill-buffer (BUFFER-NAME)
   "Kill the buffer name BUFFER-NAME."
